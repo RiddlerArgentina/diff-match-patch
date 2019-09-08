@@ -1,6 +1,7 @@
 <?php
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/)
  * lib to PHP.
  *
  * (c) 2006 Google Inc.
@@ -97,6 +98,7 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 $code = 255;
@@ -107,6 +109,7 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 $code = 256;
@@ -117,6 +120,7 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 $code = 260;
@@ -127,6 +131,7 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 $code = 65535;
@@ -137,6 +142,7 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 $code = 65536;
@@ -147,6 +153,7 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 
@@ -158,12 +165,14 @@ echo 'unicodeChr1() = ' . unicodeChr1($code) . PHP_EOL;
 echo 'unicodeChr2() = ' . unicodeChr2($code) . PHP_EOL;
 echo 'unicodeChr3() = ' . unicodeChr3($code) . PHP_EOL;
 echo 'unicodeChr4() = ' . unicodeChr4($code) . PHP_EOL;
+echo 'mb_chr() = '      . mb_chr($code) . PHP_EOL;
 echo PHP_EOL;
 
 
 $char = 'a';
 echo 'char = ' . $char . PHP_EOL;
 echo 'ord() = ' . ord($char) . PHP_EOL;
+echo 'mb_ord() = ' . mb_ord($char) . PHP_EOL;
 echo 'unicodeOrd1() = ' . unicodeOrd1($char) . PHP_EOL;
 echo PHP_EOL;
 
@@ -171,6 +180,7 @@ echo PHP_EOL;
 $char = 'Ą';
 echo 'char = ' . $char . PHP_EOL;
 echo 'ord() = ' . ord($char) . PHP_EOL;
+echo 'mb_ord() = ' . mb_ord($char) . PHP_EOL;
 echo 'unicodeOrd1() = ' . unicodeOrd1($char) . PHP_EOL;
 echo PHP_EOL;
 
@@ -178,6 +188,7 @@ echo PHP_EOL;
 $char = '😺';
 echo 'char = ' . $char . PHP_EOL;
 echo 'ord() = ' . ord($char) . PHP_EOL;
+echo 'mb_ord() = ' . mb_ord($char) . PHP_EOL;
 echo 'unicodeOrd1() = ' . unicodeOrd1($char) . PHP_EOL;
 echo PHP_EOL;
 
@@ -188,31 +199,31 @@ sleep(1);
 $N = 1000000;
 
 // chr(), M = 255
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 255;
 for ($i = 0; $i < $N; $i++) {
     $char = chr($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'chr(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 
 // unicodeChr1(), M = 255
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 255;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr1($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr1(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 
 // unicodeChr2(), M = 255
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 255;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr2($i % $M);
@@ -223,30 +234,41 @@ echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 // unicodeChr3(), M = 255
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 255;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr3($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr3(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 // unicodeChr1(), M = 65535
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 65535;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr1($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr1(), M = ' . $M . PHP_EOL;
+echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
+echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
+
+// mb_chr(), M = 65535
+$timeStart = microtime(true);
+$M = 65535;
+for ($i = 0; $i < $N; $i++) {
+    $char = mb_chr($i % $M);
+}
+$timeElapsed = microtime(true) - $timeStart;
+echo 'mb_chr(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 
 // unicodeChr2(), M = 65535
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 65535;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr2($i % $M);
@@ -257,69 +279,91 @@ echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 // unicodeChr3(), M = 65535
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 65535;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr3($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr3(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 // unicodeChr4(), M = 65535
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 65535;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr4($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr4(), M = ' . $M . PHP_EOL;
+echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
+echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
+
+// mb_chr(), M = 65535
+$timeStart = microtime(true);
+$M = 65535;
+for ($i = 0; $i < $N; $i++) {
+    $char = mb_chr($i % $M);
+}
+$timeElapsed = microtime(true) - $timeStart;
+echo 'mb_chr(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 
 // unicodeChr1(), M = 16777215
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 16777215;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr1($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr1(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 
 // unicodeChr2(), M = 16777215
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 16777215;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr2($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr2(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 // unicodeChr3(), M = 16777215
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 16777215;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr3($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr3(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
 
 // unicodeChr4(), M = 16777215
-$timeStart = microtime(1);
+$timeStart = microtime(true);
 $M = 16777215;
 for ($i = 0; $i < $N; $i++) {
     $char = unicodeChr4($i % $M);
 }
-$timeElapsed = microtime(1) - $timeStart;
+$timeElapsed = microtime(true) - $timeStart;
 echo 'unicodeChr4(), M = ' . $M . PHP_EOL;
+echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
+echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
+
+// mb_chr(), M = 16777215
+$timeStart = microtime(true);
+$M = 16777215;
+for ($i = 0; $i < $N; $i++) {
+    $char = mb_chr($i % $M);
+}
+$timeElapsed = microtime(true) - $timeStart;
+echo 'mb_chr(), M = ' . $M . PHP_EOL;
 echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
 echo 'Memory: ' . round(memory_get_peak_usage() / 1024 / 1024, 3) . PHP_EOL . PHP_EOL;
