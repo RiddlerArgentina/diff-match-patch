@@ -1,6 +1,7 @@
 <?php
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/)
  * lib to PHP.
  *
  * (c) 2006 Google Inc.
@@ -26,14 +27,13 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class DiffToolkitTest extends \PHPUnit_Framework_TestCase
-{
+class DiffToolkitTest extends \PHPUnit\Framework\TestCase {
     /**
      * @var DiffToolkit
      */
     protected $dt;
 
-    protected  function setUp() {
+    protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
 
         $this->dt = new DiffToolkit();

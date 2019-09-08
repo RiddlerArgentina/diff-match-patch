@@ -26,7 +26,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class PatchTest extends \PHPUnit_Framework_TestCase
+class PatchTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Diff
@@ -41,7 +41,7 @@ class PatchTest extends \PHPUnit_Framework_TestCase
      */
     protected $m;
 
-    protected  function setUp() {
+    protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
 
         $this->d = new Diff();

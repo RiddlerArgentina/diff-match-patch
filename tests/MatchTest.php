@@ -26,14 +26,14 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class MatchTest extends \PHPUnit_Framework_TestCase
+class MatchTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Match
      */
     protected $m;
 
-    protected  function setUp() {
+    protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
 
         $this->m = new Match();

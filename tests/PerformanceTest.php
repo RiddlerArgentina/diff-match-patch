@@ -26,9 +26,9 @@ namespace DiffMatchPatch;
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  * @runTestsInSeparateProcesses
  */
-class PerformanceTest extends \PHPUnit_Framework_TestCase
+class PerformanceTest extends \PHPUnit\Framework\TestCase
 {
-    protected  function setUp() {
+    protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
     }
 
