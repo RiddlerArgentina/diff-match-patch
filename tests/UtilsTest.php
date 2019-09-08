@@ -26,29 +26,9 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class UtilsTest extends \PHPUnit\Framework\TestCase
-{
+class UtilsTest extends \PHPUnit\Framework\TestCase {
     protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
     }
-
-    public function testUnicodeChr() : void {
-        $this->assertEquals(mb_chr(97), Utils::unicodeChr(97));
-        $this->assertEquals(mb_chr(255), Utils::unicodeChr(255));
-        $this->assertEquals(mb_chr(256), Utils::unicodeChr(256));
-        $this->assertEquals(mb_chr(260), Utils::unicodeChr(260));
-//        $this->assertEquals(mb_chr(65536), Utils::unicodeChr(65536));
-//        $this->assertEquals(mb_chr(128570), Utils::unicodeChr(128570));
-    }
-
-    public function testUnicodeOrd() : void {
-        $this->assertEquals(mb_ord('a'), Utils::unicodeOrd('a'));
-        $this->assertEquals(mb_ord('ÿ'), Utils::unicodeOrd('ÿ'));
-        $this->assertEquals(mb_ord('Ā'), Utils::unicodeOrd('Ā'));
-        $this->assertEquals(mb_ord('Ą'), Utils::unicodeOrd('Ą'));
-//        $this->assertEquals(mb_ord('𐀀'), Utils::unicodeOrd('𐀀'));
-//        $this->assertEquals(mb_ord('😺'), Utils::unicodeOrd('😺'));
-    }
-
 
 }

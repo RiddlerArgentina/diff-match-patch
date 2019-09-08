@@ -307,7 +307,7 @@ class DiffToolkit {
                 $lineArray[] = $line;
                 $lineHash[$line] = count($lineArray) - 1;
             }
-            $chars .= Utils::unicodeChr($lineHash[$line]);
+            $chars .= mb_chr($lineHash[$line]);
         }
 
         return $chars;
@@ -320,13 +320,12 @@ class DiffToolkit {
      * @param array $diffs Array of diff arrays.
      * @param array $lineArray Array of unique strings.
      */
-    public function charsToLines(&$diffs, $lineArray)
-    {
+    public function charsToLines(array &$diffs, array $lineArray) : void {
         foreach ($diffs as &$diff) {
             $text = '';
             for ($i = 0; $i < mb_strlen($diff[1]); $i++) {
                 $char = mb_substr($diff[1], $i, 1);
-                $text .= $lineArray[Utils::unicodeOrd($char)];
+                $text .= $lineArray[mb_ord($char)];
             }
             $diff[1] = $text;
         }
