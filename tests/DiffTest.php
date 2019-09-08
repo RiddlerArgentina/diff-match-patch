@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -34,172 +34,204 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
 
     protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
-
         $this->d = new Diff();
     }
 
-    public function testCleanupMerge()
-    {
+    public function testCleanupMergeNull() : void {
         // Cleanup a messy diff.
 
         // Null case.
         $this->d->setChanges(array());
         $this->d->cleanupMerge();
         $this->assertEquals(array(), $this->d->getChanges());
+    }
 
+    public function testCleanupNoChangeCase() : void {
+        // Cleanup a messy diff.
         // No change case.
         $this->d->setChanges(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::DELETE, "b"),
-            array(Diff::INSERT, "c"),
+            array(Diff::EQUAL,  'a'),
+            array(Diff::DELETE, 'b'),
+            array(Diff::INSERT, 'c'),
         ));
         $this->d->cleanupMerge();
         $this->assertEquals(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::DELETE, "b"),
-            array(Diff::INSERT, "c"),
-        ), $this->d->getChanges());
-
-        // Merge equalities.
-        $this->d->setChanges(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::EQUAL, "b"),
-            array(Diff::EQUAL, "c"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::EQUAL, "abc"),
-        ), $this->d->getChanges());
-
-        // Merge deletions.
-        $this->d->setChanges(array(
-            array(Diff::DELETE, "a"),
-            array(Diff::DELETE, "b"),
-            array(Diff::DELETE, "c"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::DELETE, "abc"),
-        ), $this->d->getChanges());
-
-        // Merge insertions.
-        $this->d->setChanges(array(
-            array(Diff::INSERT, "a"),
-            array(Diff::INSERT, "b"),
-            array(Diff::INSERT, "c"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::INSERT, "abc"),
-        ), $this->d->getChanges());
-
-        // Merge interweave.
-        $this->d->setChanges(array(
-            array(Diff::DELETE, "a"),
-            array(Diff::INSERT, "b"),
-            array(Diff::DELETE, "c"),
-            array(Diff::INSERT, "d"),
-            array(Diff::EQUAL, "e"),
-            array(Diff::EQUAL, "f"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::DELETE, "ac"),
-            array(Diff::INSERT, "bd"),
-            array(Diff::EQUAL, "ef"),
-        ), $this->d->getChanges());
-
-        // Prefix and suffix detection.
-        $this->d->setChanges(array(
-            array(Diff::DELETE, "a"),
-            array(Diff::INSERT, "abc"),
-            array(Diff::DELETE, "dc"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::DELETE, "d"),
-            array(Diff::INSERT, "b"),
-            array(Diff::EQUAL, "c"),
-        ), $this->d->getChanges());
-
-        // Prefix and suffix detection with equalities.
-        $this->d->setChanges(array(
-            array(Diff::EQUAL, "x"),
-            array(Diff::DELETE, "a"),
-            array(Diff::INSERT, "abc"),
-            array(Diff::DELETE, "dc"),
-            array(Diff::EQUAL, "y"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::EQUAL, "xa"),
-            array(Diff::DELETE, "d"),
-            array(Diff::INSERT, "b"),
-            array(Diff::EQUAL, "cy"),
-        ), $this->d->getChanges());
-
-        // Slide edit left.
-        $this->d->setChanges(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::INSERT, "ba"),
-            array(Diff::EQUAL, "c"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::INSERT, "ab"),
-            array(Diff::EQUAL, "ac"),
-        ), $this->d->getChanges());
-
-        // Slide edit right.
-        $this->d->setChanges(array(
-            array(Diff::EQUAL, "c"),
-            array(Diff::INSERT, "ab"),
-            array(Diff::EQUAL, "a"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::EQUAL, "ca"),
-            array(Diff::INSERT, "ba"),
-        ), $this->d->getChanges());
-
-        // Slide edit left recursive.
-        $this->d->setChanges(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::DELETE, "b"),
-            array(Diff::EQUAL, "c"),
-            array(Diff::DELETE, "ac"),
-            array(Diff::EQUAL, "x"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::DELETE, "abc"),
-            array(Diff::EQUAL, "acx"),
-        ), $this->d->getChanges());
-
-        // Slide edit right recursive.
-        $this->d->setChanges(array(
-            array(Diff::EQUAL, "x"),
-            array(Diff::DELETE, "ca"),
-            array(Diff::EQUAL, "c"),
-            array(Diff::DELETE, "b"),
-            array(Diff::EQUAL, "a"),
-        ));
-        $this->d->cleanupMerge();
-        $this->assertEquals(array(
-            array(Diff::EQUAL, "xca"),
-            array(Diff::DELETE, "cba"),
+            array(Diff::EQUAL,  'a'),
+            array(Diff::DELETE, 'b'),
+            array(Diff::INSERT, 'c'),
         ), $this->d->getChanges());
     }
 
-    public function testCleanupSemanticLossless()
-    {
+    public function testCleanupMergeEqualities() : void {
+        // Cleanup a messy diff.
+        // Merge equalities.
+        $this->d->setChanges(array(
+            array(Diff::EQUAL, 'a'),
+            array(Diff::EQUAL, 'b'),
+            array(Diff::EQUAL, 'c'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::EQUAL, 'abc'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeDeletions() : void {
+        // Cleanup a messy diff.
+        // Merge deletions.
+        $this->d->setChanges(array(
+            array(Diff::DELETE, 'a'),
+            array(Diff::DELETE, 'b'),
+            array(Diff::DELETE, 'c'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::DELETE, 'abc'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeInsertions() : void {
+        // Cleanup a messy diff.
+        // Merge insertions.
+        $this->d->setChanges(array(
+            array(Diff::INSERT, 'a'),
+            array(Diff::INSERT, 'b'),
+            array(Diff::INSERT, 'c'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::INSERT, 'abc'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeInterweave() : void {
+        // Cleanup a messy diff.
+        // Merge interweave.
+        $this->d->setChanges(array(
+            array(Diff::DELETE, 'a'),
+            array(Diff::INSERT, 'b'),
+            array(Diff::DELETE, 'c'),
+            array(Diff::INSERT, 'd'),
+            array(Diff::EQUAL,  'e'),
+            array(Diff::EQUAL,  'f'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::DELETE, 'ac'),
+            array(Diff::INSERT, 'bd'),
+            array(Diff::EQUAL,  'ef'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergePrefixAndSuffixDetection() : void {
+        // Cleanup a messy diff.
+        // Prefix and suffix detection.
+        $this->d->setChanges(array(
+            array(Diff::DELETE, 'a'),
+            array(Diff::INSERT, 'abc'),
+            array(Diff::DELETE, 'dc'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::EQUAL,  'a'),
+            array(Diff::DELETE, 'd'),
+            array(Diff::INSERT, 'b'),
+            array(Diff::EQUAL,  'c'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergePrefixAndSuffixDetectionWithEqualities() : void {
+        // Cleanup a messy diff.
+        // Prefix and suffix detection with equalities.
+        $this->d->setChanges(array(
+            array(Diff::EQUAL,  'x'),
+            array(Diff::DELETE, 'a'),
+            array(Diff::INSERT, 'abc'),
+            array(Diff::DELETE, 'dc'),
+            array(Diff::EQUAL,  'y'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::EQUAL,  'xa'),
+            array(Diff::DELETE, 'd'),
+            array(Diff::INSERT, 'b'),
+            array(Diff::EQUAL,  'cy'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeSlideEditLeft() : void {
+        // Cleanup a messy diff.
+        // Slide edit left.
+        $this->d->setChanges(array(
+            array(Diff::EQUAL,  'a'),
+            array(Diff::INSERT, 'ba'),
+            array(Diff::EQUAL,  'c'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::INSERT, 'ab'),
+            array(Diff::EQUAL,  'ac'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeSlideEditRight() : void {
+        // Cleanup a messy diff.
+        // Slide edit right.
+        $this->d->setChanges(array(
+            array(Diff::EQUAL,  'c'),
+            array(Diff::INSERT, 'ab'),
+            array(Diff::EQUAL,  'a'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::EQUAL,  'ca'),
+            array(Diff::INSERT, 'ba'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeSlideEditLeftRecursive() : void {
+        // Cleanup a messy diff.
+        // Slide edit left recursive.
+        $this->d->setChanges(array(
+            array(Diff::EQUAL,  'a'),
+            array(Diff::DELETE, 'b'),
+            array(Diff::EQUAL,  'c'),
+            array(Diff::DELETE, 'ac'),
+            array(Diff::EQUAL,  'x'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::DELETE, 'abc'),
+            array(Diff::EQUAL,  'acx'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupMergeSlideEditRightRecursive() : void {
+        // Cleanup a messy diff.
+        // Slide edit right recursive.
+        $this->d->setChanges(array(
+            array(Diff::EQUAL,  'x'),
+            array(Diff::DELETE, 'ca'),
+            array(Diff::EQUAL,  'c'),
+            array(Diff::DELETE, 'b'),
+            array(Diff::EQUAL,  'a'),
+        ));
+        $this->d->cleanupMerge();
+        $this->assertEquals(array(
+            array(Diff::EQUAL,  'xca'),
+            array(Diff::DELETE, 'cba'),
+        ), $this->d->getChanges());
+    }
+
+    public function testCleanupSemanticLosslessNull() : void {
         // Slide diffs to match logical boundaries.
         // Null case.
         $this->d->setChanges(array());
         $this->d->cleanupSemanticLossless();
         $this->assertEquals(array(), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessBlankLines() : void {
         // Blank lines.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "AAA\r\n\r\nBBB"),
@@ -212,7 +244,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::INSERT, "BBB\r\nDDD\r\n\r\n"),
             array(Diff::EQUAL, "BBB\r\nEEE"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessLineBoundaries() : void {
         // Line boundaries.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "AAA\r\nBBB"),
@@ -225,7 +259,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::INSERT, "BBB DDD\r\n"),
             array(Diff::EQUAL, "BBB EEE"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessWordBoundaries() : void {
         // Word boundaries.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "The c"),
@@ -238,7 +274,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::INSERT, "cow and the "),
             array(Diff::EQUAL, "cat."),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessAlphanimericBounderies() : void {
         // Alphanumeric boundaries.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "The-c"),
@@ -251,7 +289,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::INSERT, "cow-and-the-"),
             array(Diff::EQUAL, "cat."),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessHittingTheStart() : void {
         // Hitting the start.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "a"),
@@ -263,7 +303,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "a"),
             array(Diff::EQUAL, "aax"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessHittingTheEnd() : void {
         // Hitting the end.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "xa"),
@@ -275,7 +317,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::EQUAL, "xaa"),
             array(Diff::DELETE, "a"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticLosslessSentenceBoundaries() : void {
         // Sentence boundaries.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "The xxx. The "),
@@ -290,14 +334,15 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         ), $this->d->getChanges());
     }
 
-    public function testCleanupSemantic()
-    {
+    public function testCleanupSemanticNull() : void {
         // Cleanup semantically trivial equalities.
         // Null case.
         $this->d->setChanges(array());
         $this->d->cleanupSemantic();
         $this->assertEquals(array(), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticNoElimination1() : void {
         // No elimination #1.
         $this->d->setChanges(array(
             array(Diff::DELETE, "ab"),
@@ -312,7 +357,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::EQUAL, "12"),
             array(Diff::DELETE, "e"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticNoElimination2() : void {
         // No elimination #2.
         $this->d->setChanges(array(
             array(Diff::DELETE, "abc"),
@@ -327,7 +374,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::EQUAL, "1234"),
             array(Diff::DELETE, "wxyz"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticSimpleElimination() : void {
         // Simple elimination.
         $this->d->setChanges(array(
             array(Diff::DELETE, "a"),
@@ -339,7 +388,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "abc"),
             array(Diff::INSERT, "b"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticBackpassElimination() : void {
         // Backpass elimination.
         $this->d->setChanges(array(
             array(Diff::DELETE, "ab"),
@@ -353,7 +404,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "abcdef"),
             array(Diff::INSERT, "cdfg"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticMultipleEliminations() : void {
         // Multiple eliminations.
         $this->d->setChanges(array(
             array(Diff::INSERT, "1"),
@@ -371,7 +424,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "AB_AB"),
             array(Diff::INSERT, "1A2_1A2"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticWordBoundaries() : void {
         // Word boundaries.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "The c"),
@@ -384,7 +439,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "cow and the "),
             array(Diff::EQUAL, "cat."),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticNoOverlapElimination() : void {
         // No overlap elimination.
         $this->d->setChanges(array(
             array(Diff::DELETE, "abcxx"),
@@ -395,7 +452,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "abcxx"),
             array(Diff::INSERT, "xxdef"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticOverlapElimination() : void {
         // Overlap elimination.
         $this->d->setChanges(array(
             array(Diff::DELETE, "abcxxx"),
@@ -407,7 +466,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::EQUAL, "xxx"),
             array(Diff::INSERT, "def"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticReverseOverlapElimination() : void {
         // Reverse overlap elimination.
         $this->d->setChanges(array(
             array(Diff::DELETE, "xxxabc"),
@@ -419,7 +480,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::EQUAL, "xxx"),
             array(Diff::DELETE, "abc"),
         ), $this->d->getChanges());
+    }
 
+    public function testCleanupSemanticTwoOverlapEliminations() : void {
         // Two overlap eliminations.
         $this->d->setChanges(array(
             array(Diff::DELETE, "abcd1212"),
@@ -440,8 +503,7 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         ), $this->d->getChanges());
     }
 
-    public function testCleanupEfficiency()
-    {
+    public function testCleanupEfficiencyNull() : void {
         // Cleanup operationally trivial equalities.
         $this->d->setEditCost(4);
 
@@ -449,6 +511,11 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         $this->d->setChanges(array());
         $this->d->cleanupEfficiency();
         $this->assertEquals(array(), $this->d->getChanges());
+    }
+
+    public function testCleanupEfficiencyNoEliminations() : void {
+        // Cleanup operationally trivial equalities.
+        $this->d->setEditCost(4);
 
         // No elimination.
         $this->d->setChanges(array(
@@ -466,6 +533,11 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "cd"),
             array(Diff::INSERT, "34"),
         ), $this->d->getChanges());
+    }
+
+    public function testCleanupEfficiencyFourEditElimination() : void {
+        // Cleanup operationally trivial equalities.
+        $this->d->setEditCost(4);
 
         // Four-edit elimination.
         $this->d->setChanges(array(
@@ -480,6 +552,11 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "abxyzcd"),
             array(Diff::INSERT, "12xyz34"),
         ), $this->d->getChanges());
+    }
+
+    public function testCleanupEfficiencyThreeEditElimination() : void {
+        // Cleanup operationally trivial equalities.
+        $this->d->setEditCost(4);
 
         // Three-edit elimination.
         $this->d->setChanges(array(
@@ -493,6 +570,11 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "xcd"),
             array(Diff::INSERT, "12x34"),
         ), $this->d->getChanges());
+    }
+
+    public function testCleanupEfficiencyBackpassElimination() : void {
+        // Cleanup operationally trivial equalities.
+        $this->d->setEditCost(4);
 
         // Backpass elimination.
         $this->d->setChanges(array(
@@ -509,6 +591,11 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             array(Diff::DELETE, "abxyzcd"),
             array(Diff::INSERT, "12xy34z56"),
         ), $this->d->getChanges());
+    }
+
+    public function testCleanupEfficiencyHighCostElimination() : void {
+        // Cleanup operationally trivial equalities.
+        $this->d->setEditCost(4);
 
         // High cost elimination.
         $this->d->setEditCost(5);
@@ -527,7 +614,7 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         $this->d->setEditCost(4);
     }
 
-    public function testPrettyHtml(){
+    public function testPrettyHtml() : void {
         // Pretty print.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "a\n"),
@@ -540,7 +627,7 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         );
     }
 
-    public function testText(){
+    public function testText() : void {
         // Compute the source and destination texts.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "jump"),
@@ -561,8 +648,7 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         );
     }
 
-    public function testDelta()
-    {
+    public function testDelta() : void {
         // Convert a diff into delta string.
         $this->d->setChanges(array(
             array(Diff::EQUAL, "jump"),
@@ -584,28 +670,22 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->d->getChanges(), $this->d->fromDelta($text1, $delta)->getChanges());
 
         // Generates error (19 != 20).
-        try {
-            $this->d->fromDelta($text1 . 'x', $delta);
-            $this->fail();
-        } catch (\InvalidArgumentException $e) {
-        }
+        $this->expectException(\InvalidArgumentException::class);
+        $this->d->fromDelta($text1 . 'x', $delta);
 
         // Generates error (19 != 18).
-        try {
-            $this->d->fromDelta(mb_substr($text1, 1), $delta);
-            $this->fail();
-        } catch (\InvalidArgumentException $e) {
-        }
+        $this->expectException(\InvalidArgumentException::class);
+        $this->d->fromDelta(mb_substr($text1, 1), $delta);
 
         // Test deltas with special characters.
         $this->d->setChanges(array(
-            array(Diff::EQUAL, Utils::unicodeChr(0x0680) . " \x00 \t %"),
-            array(Diff::DELETE, Utils::unicodeChr(0x0681) . " \x01 \n ^"),
-            array(Diff::INSERT, Utils::unicodeChr(0x0682) . " \x02 \\ |"),
+            array(Diff::EQUAL,  mb_chr(0x0680) . " \x00 \t %"),
+            array(Diff::DELETE, mb_chr(0x0681) . " \x01 \n ^"),
+            array(Diff::INSERT, mb_chr(0x0682) . " \x02 \\ |"),
         ));
 
         $text1 = $this->d->text1();
-        $this->assertEquals(Utils::unicodeChr(0x0680) . " \x00 \t %" . Utils::unicodeChr(0x0681) . " \x01 \n ^", $text1);
+        $this->assertEquals(mb_chr(0x0680) . " \x00 \t %" . mb_chr(0x0681) . " \x01 \n ^", $text1);
 
         $delta = $this->d->toDelta();
         $this->assertEquals("=7\t-7\t+%DA%82 %02 %5C %7C", $delta);
@@ -615,67 +695,66 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
 
         // Verify pool of unchanged characters.
         $this->d->setChanges(array(
-            array(Diff::INSERT, "A-Z a-z 0-9 - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , # "),
+            array(Diff::INSERT, 'A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # '),
         ));
 
         $text2 = $this->d->text2();
-        $this->assertEquals("A-Z a-z 0-9 - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , # ", $text2);
+        $this->assertEquals('A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ', $text2);
 
         $delta = $this->d->toDelta();
-        $this->assertEquals("+A-Z a-z 0-9 - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , # ", $delta);
+        $this->assertEquals('+A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ', $delta);
 
         // Convert delta string into a diff.
-        $this->assertEquals($this->d->getChanges(), $this->d->fromDelta("", $delta)->getChanges());
+        $this->assertEquals($this->d->getChanges(), $this->d->fromDelta('', $delta)->getChanges());
     }
 
-    public function testXIndex()
-    {
+    public function testXIndexTranslateALocationInText1ToText2() : void {
         // Translate a location in text1 to text2.
         $this->d->setChanges(array(
-            array(Diff::DELETE, "a"),
-            array(Diff::INSERT, "1234"),
-            array(Diff::EQUAL, "xyz"),
+            array(Diff::DELETE, 'a'),
+            array(Diff::INSERT, '1234'),
+            array(Diff::EQUAL,  'xyz'),
         ));
         $this->assertEquals(5, $this->d->xIndex(2));
+    }
 
+    public function testXIndexTranslationOnDeletion() : void {
         // Translation on deletion.
         $this->d->setChanges(array(
-            array(Diff::EQUAL, "a"),
-            array(Diff::DELETE, "1234"),
-            array(Diff::EQUAL, "xyz"),
+            array(Diff::EQUAL,  'a'),
+            array(Diff::DELETE, '1234'),
+            array(Diff::EQUAL,  'xyz'),
         ));
         $this->assertEquals(1, $this->d->xIndex(3));
     }
 
-    public function testLevenshtein()
-    {
+    public function testLevenshtein() : void {
         // Levenshtein with trailing equality.
         $this->d->setChanges(array(
-            array(Diff::DELETE, "abc"),
-            array(Diff::INSERT, "1234"),
-            array(Diff::EQUAL, "xyz"),
+            array(Diff::DELETE, 'abc'),
+            array(Diff::INSERT, '1234'),
+            array(Diff::EQUAL,  'xyz'),
         ));
         $this->assertEquals(4, $this->d->levenshtein());
 
         // Levenshtein with leading equality.
         $this->d->setChanges(array(
-            array(Diff::EQUAL, "xyz"),
-            array(Diff::DELETE, "abc"),
-            array(Diff::INSERT, "1234"),
+            array(Diff::EQUAL,  'xyz'),
+            array(Diff::DELETE, 'abc'),
+            array(Diff::INSERT, '1234'),
         ));
         $this->assertEquals(4, $this->d->levenshtein());
 
         // Levenshtein with middle equality.
         $this->d->setChanges(array(
-            array(Diff::DELETE, "abc"),
-            array(Diff::EQUAL, "xyz"),
-            array(Diff::INSERT, "1234"),
+            array(Diff::DELETE, 'abc'),
+            array(Diff::EQUAL, 'xyz'),
+            array(Diff::INSERT, '1234'),
         ));
         $this->assertEquals(7, $this->d->levenshtein());
     }
 
-    public function testBisect()
-    {
+    public function testBisect() : void {
         $method = new \ReflectionMethod('DiffMatchPatch\Diff', 'bisect');
         $method->setAccessible(true);
 
@@ -683,27 +762,27 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         // the insertion and deletion pairs are swapped.
         // If the order changes, tweak this test as required.
         $this->assertEquals(array(
-            array(Diff::DELETE, "c"),
-            array(Diff::INSERT, "m"),
-            array(Diff::EQUAL, "a"),
-            array(Diff::DELETE, "t"),
-            array(Diff::INSERT, "p"),
+            array(Diff::DELETE, 'c'),
+            array(Diff::INSERT, 'm'),
+            array(Diff::EQUAL, 'a'),
+            array(Diff::DELETE, 't'),
+            array(Diff::INSERT, 'p'),
         ), $method->invoke($this->d, 'cat', 'map', PHP_INT_MAX));
 
         // Timeout.
         $this->assertEquals(array(
-            array(Diff::DELETE, "cat"),
-            array(Diff::INSERT, "map"),
+            array(Diff::DELETE, 'cat'),
+            array(Diff::INSERT, 'map'),
         ), $method->invoke($this->d, 'cat', 'map', 0));
-
     }
 
-    public function testMain()
-    {
+    public function testMainNull() : void {
         // Perform a trivial diff.
         // Null case.
         $this->assertEquals(array(), $this->d->main("", "", false)->getChanges());
+    }
 
+    public function testMainEquality() : void {
         // Equality.
         $this->assertEquals(
             array(
@@ -711,23 +790,27 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             ),
             $this->d->main("abc", "abc", false)->getChanges()
         );
+    }
 
+    public function testMain0Strings1() : void {
         // Check '0' strings
         $this->assertEquals(
             array(
-                array(Diff::EQUAL, "0"),
-                array(Diff::INSERT, "X"),
-                array(Diff::EQUAL, "12"),
-                array(Diff::INSERT, "X"),
-                array(Diff::EQUAL, "0"),
-                array(Diff::INSERT, "X"),
-                array(Diff::EQUAL, "34"),
-                array(Diff::INSERT, "X"),
-                array(Diff::EQUAL, "0"),
+                array(Diff::EQUAL, '0'),
+                array(Diff::INSERT, 'X'),
+                array(Diff::EQUAL, '12'),
+                array(Diff::INSERT, 'X'),
+                array(Diff::EQUAL, '0'),
+                array(Diff::INSERT, 'X'),
+                array(Diff::EQUAL, '34'),
+                array(Diff::INSERT, 'X'),
+                array(Diff::EQUAL, '0'),
             ),
-            $this->d->main("0120340", "0X12X0X34X0", false)->getChanges()
+            $this->d->main('0120340', '0X12X0X34X0', false)->getChanges()
         );
+    }
 
+    public function testMain0String2() : void {
         $this->assertEquals(
             array(
                 array(Diff::EQUAL, "0"),
@@ -758,12 +841,12 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(
             array(
                 array(Diff::DELETE, "a"),
-                array(Diff::INSERT, Utils::unicodeChr(0x0680)),
+                array(Diff::INSERT, mb_chr(0x0680)),
                 array(Diff::EQUAL, "x"),
                 array(Diff::DELETE, "\t"),
                 array(Diff::INSERT, "\x00"),
             ),
-            $this->d->main("ax\t", Utils::unicodeChr(0x0680) . "x\x00", false)->getChanges()
+            $this->d->main("ax\t", mb_chr(0x0680) . "x\x00", false)->getChanges()
         );
 
         // Overlaps.
@@ -802,30 +885,33 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             ),
             $this->d->main("ABCDa=bcd=efghijklmnopqrsEFGHIJKLMNOefg", "a-bcd-efghijklmnopqrs", false)->getChanges()
         );
+    }
 
-        // Large equality.
-        $this->assertEquals(
-            array(
-                array(Diff::INSERT, " "),
-                array(Diff::EQUAL, "a"),
-                array(Diff::INSERT, "nd"),
-                array(Diff::EQUAL, " [[Pennsylvania]]"),
-                array(Diff::DELETE, " and [[New"),
-            ),
-            $this->d->main("a [[Pennsylvania]] and [[New", " and [[Pennsylvania]]", false)->getChanges()
-        );
-
+    public function testEmoji() : void {
         // Emoji
         $this->assertEquals(
             array(
-                array(Diff::EQUAL, "Car"),
-                array(Diff::INSERT, " — 🚘"),
-                array(Diff::EQUAL, "!"),
+                array(Diff::EQUAL, 'Car'),
+                array(Diff::INSERT, ' — 🚘'),
+                array(Diff::EQUAL, '!'),
             ),
-            $this->d->main("Car!", "Car — 🚘!", false)->getChanges()
+            $this->d->main('Car!', 'Car — 🚘!', false)->getChanges()
         );
+    }
 
+    public function testEmoji2() : void {
+        // Emoji
+        $this->assertEquals(
+            array(
+                array(Diff::EQUAL, '😄😊😉'),
+                array(Diff::INSERT, '😍😘😚😜'),
+                array(Diff::EQUAL, '😝'),
+            ),
+            $this->d->main('😄😊😉😝', '😄😊😉😍😘😚😜😝', false)->getChanges()
+        );
+    }
 
+    public function testTimeout() : void {
         // Timeout.
         // 100ms
         $this->d->setTimeout(0.1);
@@ -836,9 +922,9 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             $a .= $a;
             $b .= $b;
         }
-        $startTime = microtime(1);
+        $startTime = microtime(true);
         $this->d->main($a, $b);
-        $endTime = microtime(1);
+        $endTime = microtime(true);
 
         // Test that we took at least the timeout period.
         $this->assertGreaterThanOrEqual($this->d->getTimeout(), $endTime - $startTime);
@@ -849,37 +935,65 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
         // TODO must be $this->d->getTimeout() * 2, but it need some optimization of linesToCharsMunge()
         $this->assertLessThan($this->d->getTimeout() * 15, $endTime - $startTime);
         $this->d->setTimeout(0);
+    }
 
+    public function testLargeEquality() : void {
+        // Large equality.
+        $this->assertEquals(
+            array(
+                array(Diff::INSERT, ' '),
+                array(Diff::EQUAL, 'a'),
+                array(Diff::INSERT, 'nd'),
+                array(Diff::EQUAL, ' [[Pennsylvania]]'),
+                array(Diff::DELETE, ' and [[New'),
+            ),
+            $this->d->main('a [[Pennsylvania]] and [[New', ' and [[Pennsylvania]]', false)->getChanges()
+        );
+    }
+
+    public function testSimpleLineMode() : void {
         // Test the linemode speedup.
         // Must be long to pass the 100 char cutoff.
         // Simple line-mode.
-        $a = str_repeat("1234567890\n", ceil(Diff::LINEMODE_THRESOLD / strlen($a)));
-        $b = str_repeat("abcdefghij\n", ceil(Diff::LINEMODE_THRESOLD / strlen($b)));
+        $a = str_repeat("1234567890\n", 50);
+        $b = str_repeat("abcdefghij\n", 50);
+        $this->assertTrue(
+            strlen($a) > 100
+        );
+        $this->assertTrue(
+            strlen($b) > 100
+        );
         $this->assertEquals(
             $this->d->main($a, $b, false)->getChanges(),
             $this->d->main($a, $b, true)->getChanges()
         );
+    }
 
+    public function testSingleLineModeWithMultipleLineBreaks() : void {
         // Simple line-mode with multiple line breaks.
         $a = "12345\n\n67890\n";
-        $a = str_repeat($a, ceil(Diff::LINEMODE_THRESOLD / strlen($a)));
+        $a = str_repeat($a, (int)ceil(Diff::LINEMODE_THRESOLD / strlen($a)));
         $b = "abcde\n\nfghij\n";
-        $b = str_repeat($b, ceil(Diff::LINEMODE_THRESOLD / strlen($b)));
+        $b = str_repeat($b, (int)ceil(Diff::LINEMODE_THRESOLD / strlen($b)));
         $this->assertEquals(
             $this->d->main($a, $b, false)->getChanges(),
             $this->d->main($a, $b, true)->getChanges()
         );
+    }
 
+    public function testSingleLineModeWithMultipleLineBreaksButWithoutLeadingLineBreak() : void {
         // Simple line-mode with multiple line breaks but without leading line break
         $a = "12345\n\n67890\n";
-        $a = str_repeat($a, ceil(Diff::LINEMODE_THRESOLD / strlen($a))) . '0';
+        $a = str_repeat($a, (int)ceil(Diff::LINEMODE_THRESOLD / strlen($a))) . '0';
         $b = "abcde\n\nfghij\n";
-        $b = str_repeat($b, ceil(Diff::LINEMODE_THRESOLD / strlen($b))) . 'a    ';
+        $b = str_repeat($b, (int)ceil(Diff::LINEMODE_THRESOLD / strlen($b))) . 'a    ';
         $this->assertEquals(
             $this->d->main($a, $b, false)->getChanges(),
             $this->d->main($a, $b, true)->getChanges()
         );
+    }
 
+    public function testSingleLineMode() : void {
         // Single line-mode.
         $a = str_repeat("1234567890", 13);
         $b = str_repeat("abcdefghij", 13);
@@ -887,35 +1001,35 @@ class DiffTest extends \PHPUnit\Framework\TestCase {
             $this->d->main($a, $b, false)->getChanges(),
             $this->d->main($a, $b, true)->getChanges()
         );
+    }
 
-        function rebuildtexts($diffs) {
-            // Construct the two texts which made up the diff originally.
-            $text1 = "";
-            $text2 = "";
-            foreach ($diffs as $change) {
-                if ($change[0] != Diff::INSERT) {
-                    $text1 .= $change[1];
-                }
-                if ($change[0] != Diff::DELETE) {
-                    $text2 .= $change[1];
-                }
-            }
-            return array($text1, $text2);
-        }
+    public function testOverlapLineMode() : void {
         // Overlap line-mode.
         $a = str_repeat("1234567890\n", 13);
         $b = "abcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n";
         $this->assertEquals(
-            rebuildtexts($this->d->main($a, $b, false)->getChanges()),
-            rebuildtexts($this->d->main($a, $b, true)->getChanges())
+            $this->rebuildtexts($this->d->main($a, $b, false)->getChanges()),
+            $this->rebuildtexts($this->d->main($a, $b, true)->getChanges())
         );
-
-        // Test null inputs.
-        try {
-            $this->d->main(null, null);
-            $this->fail();
-        } catch (\InvalidArgumentException $e) {
-        }
     }
 
+    function rebuildtexts(array $diffs) : array {
+        // Construct the two texts which made up the diff originally.
+        $text1 = "";
+        $text2 = "";
+        foreach ($diffs as $change) {
+            if ($change[0] != Diff::INSERT) {
+                $text1 .= $change[1];
+            }
+            if ($change[0] != Diff::DELETE) {
+                $text2 .= $change[1];
+            }
+        }
+        return array($text1, $text2);
+    }
+
+    public function testNull() : void {
+        $this->expectException(\TypeError::class);
+        $this->d->main(null, null);
+    }
 }

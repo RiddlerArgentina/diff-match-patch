@@ -1,8 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * DiffMatchPatch is a port of the google-diff-match-patch
- * (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -21,13 +20,11 @@
  */
 
 
-function unicodeChr1($code)
-{
+function unicodeChr1($code) {
     return mb_convert_encoding('&#' . $code . ';', 'UTF-8', 'HTML-ENTITIES');
 }
 
-function unicodeChr2($code)
-{
+function unicodeChr2($code) {
     if ($code < 0xFFFF) {
         return json_decode('"' . sprintf('\u%04X', $code) . '"');
     } else {
@@ -37,8 +34,7 @@ function unicodeChr2($code)
     }
 }
 
-function unicodeChr3($code)
-{
+function unicodeChr3($code) {
     if ($code < 0xFF) {
         return chr($code);
     } elseif ($code < 0xFFFF) {
@@ -50,8 +46,7 @@ function unicodeChr3($code)
     }
 }
 
-function unicodeChr4($code)
-{
+function unicodeChr4($code) {
     if ($code < 0xFF) {
         return chr($code);
     } elseif(PHP_MAJOR_VERSION >= 7) {
@@ -69,8 +64,7 @@ function unicodeChr4($code)
     }
 }
 
-function unicodeOrd1($char)
-{
+function unicodeOrd1($char) {
     if (mb_internal_encoding() != 'UCS-4LE') {
         $char = iconv(mb_internal_encoding(), 'UCS-4LE', $char);
     }

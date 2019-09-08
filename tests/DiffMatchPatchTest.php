@@ -1,8 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * DiffMatchPatch is a port of the google-diff-match-patch
- * (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -30,8 +29,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
-{
+class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase {
     /**
      * @var DiffMatchPatch
      */
@@ -43,8 +41,7 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         $this->dmp = new DiffMatchPatch();
     }
 
-    public function testProperties()
-    {
+    public function testProperties() : void {
         $this->dmp->Diff_Timeout = 13.1;
         $this->assertEquals(13.1, $this->dmp->Diff_Timeout);
 
@@ -67,8 +64,7 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(13, $this->dmp->Patch_Margin);
     }
 
-    public function testDiffMain()
-    {
+    public function testDiffMain() : void {
         $this->assertEquals(
             array(
                 array(DiffMatchPatch::DIFF_DELETE, "Apple"),
@@ -81,8 +77,7 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testDiffCleanupSemantic()
-    {
+    public function testDiffCleanupSemantic() : void {
         $diffs = array(
             array(DiffMatchPatch::DIFF_INSERT, "1"),
             array(DiffMatchPatch::DIFF_EQUAL, "A"),
@@ -101,8 +96,7 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         ), $diffs);
     }
 
-    public function testDiffCleanupEfficiency()
-    {
+    public function testDiffCleanupEfficiency() : void {
         $diffs = array(
             array(DiffMatchPatch::DIFF_DELETE, "ab"),
             array(DiffMatchPatch::DIFF_INSERT, "12"),
@@ -117,8 +111,7 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         ), $diffs);
     }
 
-    public function testDiffLevenshtein()
-    {
+    public function testDiffLevenshtein() : void {
         $this->assertEquals(4, $this->dmp->diff_levenshtein(array(
             array(DiffMatchPatch::DIFF_EQUAL, "xyz"),
             array(DiffMatchPatch::DIFF_DELETE, "abc"),
@@ -126,8 +119,7 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         )));
     }
 
-    public function testDiffPrettyHtml()
-    {
+    public function testDiffPrettyHtml() : void {
         $diffs = array(
             array(DiffMatchPatch::DIFF_EQUAL, "a\n"),
             array(DiffMatchPatch::DIFF_DELETE, "<B>b</B>"),
@@ -139,26 +131,22 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testMatchMain()
-    {
+    public function testMatchMain() : void {
         $this->assertEquals(3, $this->dmp->match_main("abcdef", "defy", 4));
     }
 
-    public function testPatchFromText()
-    {
+    public function testPatchFromText() : void {
         $text = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n %0Alaz\n";
         $patches = $this->dmp->patch_fromText($text);
         $this->assertEquals($text, (string)$patches[0]);
     }
 
-    public function testPatchToText()
-    {
+    public function testPatchToText() : void {
         $text = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n  laz\n";
         $this->assertEquals($text, $this->dmp->patch_toText($this->dmp->patch_fromText($text)));
     }
 
-    public function testPatchMake()
-    {
+    public function testPatchMake() : void {
         $text1 = "The quick brown fox jumps over the lazy dog.";
         $text2 = "That quick brown fox jumped over a lazy dog.";
         $expected = "@@ -1,8 +1,7 @@\n Th\n-at\n+e\n  qui\n@@ -21,17 +21,18 @@\n jump\n-ed\n+s\n  over \n-a\n+the\n  laz\n";
@@ -166,36 +154,53 @@ class DiffMatchPatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expected, $this->dmp->patch_toText($patches));
     }
 
-    protected function _testPatchApply($text1, $text2, $target = NULL, $expected = NULL) {
-      if ($target === NULL) {
-        $target = $text1;
-      }
-      if ($expected === NULL) {
-        $expected = $text2;
-      }
+    protected function _testPatchApply($text1, $text2, $target = NULL, $expected = NULL) : void {
+        if ($target === NULL) {
+            $target = $text1;
+        }
 
-      $patches = $this->dmp->patch_make($text1, $text2);
-      $this->assertEquals(
-        array($expected, array_map(function() { return TRUE; }, $patches)),
-        $this->dmp->patch_apply($patches, $target)
-      );
+        if ($expected === NULL) {
+            $expected = $text2;
+        }
+
+        $patches = $this->dmp->patch_make($text1, $text2);
+        $this->assertEquals(
+            array($expected, array_map(function() { return TRUE; }, $patches)),
+            $this->dmp->patch_apply($patches, $target)
+        );
     }
 
-    public function testPatchApply() {
-      $this->_testPatchApply(
-        "The quick brown fox jumps over the lazy dog.",
-        "That quick brown fox jumped over a lazy dog.",
-        "The quick red rabbit jumps over the tired tiger.",
-        "That quick red rabbit jumped over a tired tiger."
-      );
+    public function testPatchApply() : void {
+        $this->_testPatchApply(
+            "The quick brown fox jumps over the lazy dog.",
+            "That quick brown fox jumped over a lazy dog.",
+            "The quick red rabbit jumps over the tired tiger.",
+            "That quick red rabbit jumped over a tired tiger."
+        );
     }
 
-    public function testPatchApply_2() {
-      $linemode_pad = str_pad('pad', Diff::LINEMODE_THRESOLD, 'x');
-      $this->_testPatchApply(
-        "line number one\n\nLine number three" . $linemode_pad . 'a',
-        "LINE number one\nThe second line\n\nThis is Line number three" . $linemode_pad . 'b'
-      );
+    public function testPatchApply_2() : void {
+        $linemode_pad = str_pad('pad', Diff::LINEMODE_THRESOLD, 'x');
+        $this->_testPatchApply(
+          "line number one\n\nLine number three" . $linemode_pad . 'a',
+          "LINE number one\nThe second line\n\nThis is Line number three" . $linemode_pad . 'b'
+        );
+    }
+
+    public function testPatchApply_3() : void {
+        $linemode_pad = str_pad('pad', Diff::LINEMODE_THRESOLD, 'x');
+        $file1 = file_get_contents('fixtures/L_performance1.txt');
+        $file2 = file_get_contents('fixtures/L_performance2.txt');
+        $patch = $this->dmp->patch_make($file1, $file2);
+        $this->assertEquals($file2, $this->dmp->patch_apply($patch, $file1)[0]);
+    }
+
+    public function testPatchApply_4() : void {
+        $linemode_pad = str_pad('pad', Diff::LINEMODE_THRESOLD, 'x');
+        $file1 = file_get_contents('fixtures/M_performance2.txt');
+        $file2 = file_get_contents('fixtures/M_performance1.txt');
+        $patch = $this->dmp->patch_make($file2, $file1);
+        $this->assertEquals($file1, $this->dmp->patch_apply($patch, $file2)[0]);
     }
 
 }

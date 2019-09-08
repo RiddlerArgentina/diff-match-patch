@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -26,8 +26,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class PatchTest extends \PHPUnit\Framework\TestCase
-{
+class PatchTest extends \PHPUnit\Framework\TestCase {
     /**
      * @var Diff
      */
@@ -51,8 +50,7 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         $this->p = new Patch($this->d, $this->m);
     }
 
-    public function testPatchObj()
-    {
+    public function testPatchObj() : void {
         $p = new PatchObject();
         $p->setStart1(20);
         $p->setStart2(21);
@@ -70,8 +68,7 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals("@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n %0Alaz\n", (string)$p);
     }
 
-    public function testFromText()
-    {
+    public function testFromText() : void {
         $this->assertEquals(array(), $this->p->fromText(""));
 
         $text = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n %0Alaz\n";
@@ -89,17 +86,14 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         $text = "@@ -0,0 +1,3 @@\n+abc\n";
         $patches = $this->p->fromText($text);
         $this->assertEquals($text, (string)$patches[0]);
-
-        try {
-            $this->p->fromText("Bad\nPatch\n");
-            $this->fail();
-        } catch (\InvalidArgumentException $e) {
-
-        }
     }
 
-    public function testToText()
-    {
+    public function testToTextBadPatch() : void {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->p->fromText("Bad\nPatch\n");
+    }
+
+    public function testToText() : void {
         $text = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n  laz\n";
         $this->assertEquals($text, $this->p->toText($this->p->fromText($text)));
 
@@ -107,8 +101,7 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($text, $this->p->toText($this->p->fromText($text)));
     }
 
-    public function testAddContext()
-    {
+    public function testAddContext() : void {
         $this->p->setMargin(4);
         $patches = $this->p->fromText("@@ -21,4 +21,10 @@\n-jump\n+somersault\n");
         $this->p->addContext($patches[0], "The quick brown fox jumps over the lazy dog.");
@@ -116,7 +109,10 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             "@@ -17,12 +17,18 @@\n fox \n-jump\n+somersault\n s ov\n",
             (string)$patches[0]
         );
+    }
 
+    public function testAddContextNotEnoughTrailingContext() : void {
+        $this->p->setMargin(4);
         // Same, but not enough trailing context.
         $patches = $this->p->fromText("@@ -21,4 +21,10 @@\n-jump\n+somersault\n");
         $this->p->addContext($patches[0], "The quick brown fox jumps.");
@@ -124,7 +120,10 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             "@@ -17,10 +17,16 @@\n fox \n-jump\n+somersault\n s.\n",
             (string)$patches[0]
         );
+    }
 
+    public function testAddContextNotEnoughLeadingContext() : void {
+        $this->p->setMargin(4);
         // Same, but not enough leading context.
         $patches = $this->p->fromText("@@ -3 +3,2 @@\n-e\n+at\n");
         $this->p->addContext($patches[0], "The quick brown fox jumps.");
@@ -132,7 +131,10 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             "@@ -1,7 +1,8 @@\n Th\n-e\n+at\n  qui\n",
             (string)$patches[0]
         );
+    }
 
+    public function testAddContextAmbiguity() : void {
+        $this->p->setMargin(4);
         // Same, but with ambiguity.
         $patches = $this->p->fromText("@@ -3 +3,2 @@\n-e\n+at\n");
         $this->p->addContext($patches[0], "The quick brown fox jumps.  The quick brown fox crashes.");
@@ -142,8 +144,7 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testMake()
-    {
+    public function testMake() : void {
         // Null case.
         $patches = $this->p->make("", "");
         $this->assertEquals("", $this->p->toText($patches));
@@ -174,14 +175,18 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         // Text1+Text2+Diff inputs (deprecated).
         $patches = $this->p->make($text1, $text2, $diffs);
         $this->assertEquals($expected, $this->p->toText($patches));
+    }
 
+    public function testMakeCharEncoding() : void {
         // Character encoding.
         $patches = $this->p->make("`1234567890-=[]\\;',./", "~!@#$%^&*()_+{}|:\"<>?");
         $this->assertEquals(
             "@@ -1,21 +1,21 @@\n-%601234567890-=%5B%5D%5C;',./\n+~!@#$%25%5E&*()_+%7B%7D%7C:%22%3C%3E?\n",
             $this->p->toText($patches)
         );
+    }
 
+    public function testMakeCharDecoding() : void {
         // Character decoding.
         $diffs = array(
             array(Diff::DELETE, "`1234567890-=[]\\;',./"),
@@ -189,7 +194,9 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         );
         $patches = $this->p->fromText("@@ -1,21 +1,21 @@\n-%601234567890-=%5B%5D%5C;',./\n+~!@#$%25%5E&*()_+%7B%7D%7C:%22%3C%3E?\n");
         $this->assertEquals($diffs, $patches[0]->getChanges());
+    }
 
+    public function testMakeLongStrings() : void {
         // Long string with repeats.
         $text1 = "";
         for($i = 0; $i < 100; $i++) {
@@ -199,25 +206,24 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         $expected = "@@ -573,28 +573,31 @@\n cdefabcdefabcdefabcdefabcdef\n+123\n";
         $patches = $this->p->make($text1, $text2);
         $this->assertEquals($expected, $this->p->toText($patches));
-
-        // Test null inputs.
-        try {
-            $this->p->make(null, null);
-            $this->fail();
-        } catch (\InvalidArgumentException $e) {
-
-        }
     }
 
-    public function testSplitMax()
-    {
+    public function testMakeNull() : void {
+        // Test null inputs.
+        $this->expectException(\InvalidArgumentException::class);
+        $this->p->make(null, null);
+    }
+
+    public function testSplitMax1() : void {
         $patches = $this->p->make("abcdefghijklmnopqrstuvwxyz01234567890", "XabXcdXefXghXijXklXmnXopXqrXstXuvXwxXyzX01X23X45X67X89X0");
         $this->p->splitMax($patches);
         $this->assertEquals(
             "@@ -1,32 +1,46 @@\n+X\n ab\n+X\n cd\n+X\n ef\n+X\n gh\n+X\n ij\n+X\n kl\n+X\n mn\n+X\n op\n+X\n qr\n+X\n st\n+X\n uv\n+X\n wx\n+X\n yz\n+X\n 012345\n@@ -25,13 +39,18 @@\n zX01\n+X\n 23\n+X\n 45\n+X\n 67\n+X\n 89\n+X\n 0\n",
             $this->p->toText($patches)
         );
+    }
 
+    public function testSplitMax2() : void {
         $patches = $this->p->make("abcdef1234567890123456789012345678901234567890123456789012345678901234567890uvwxyz", "abcdefuvwxyz");
         $oldPathesText = $this->p->toText($patches);
         $this->p->splitMax($patches);
@@ -225,14 +231,18 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             $oldPathesText,
             $this->p->toText($patches)
         );
+    }
 
+    public function testSplitMax3() : void {
         $patches = $this->p->make("1234567890123456789012345678901234567890123456789012345678901234567890", "abc");
         $this->p->splitMax($patches);
         $this->assertEquals(
             "@@ -1,32 +1,4 @@\n-1234567890123456789012345678\n 9012\n@@ -29,32 +1,4 @@\n-9012345678901234567890123456\n 7890\n@@ -57,14 +1,3 @@\n-78901234567890\n+abc\n",
             $this->p->toText($patches)
         );
+    }
 
+    public function testSplitMax4() : void {
         $patches = $this->p->make("abcdefghij , h : 0 , t : 1 abcdefghij , h : 0 , t : 1 abcdefghij , h : 0 , t : 1", "abcdefghij , h : 1 , t : 1 abcdefghij , h : 1 , t : 1 abcdefghij , h : 0 , t : 1");
         $this->p->splitMax($patches);
         $this->assertEquals(
@@ -241,8 +251,7 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testAddPadding()
-    {
+    public function testAddPaddingEdgesFull() : void {
         // Both edges full.
         $patches = $this->p->make("", "test");
         $this->assertEquals("@@ -0,0 +1,4 @@\n+test\n", $this->p->toText($patches));
@@ -251,7 +260,9 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             "@@ -1,8 +1,12 @@\n %01%02%03%04\n+test\n %01%02%03%04\n",
             $this->p->toText($patches)
         );
+    }
 
+    public function testAddPaddingEdgesPartial() : void {
         // Both edges partial.
         $patches = $this->p->make("XY", "XtestY");
         $this->assertEquals("@@ -1,2 +1,6 @@\n X\n+test\n Y\n", $this->p->toText($patches));
@@ -260,7 +271,9 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             "@@ -2,8 +2,12 @@\n %02%03%04X\n+test\n Y%01%02%03\n",
             $this->p->toText($patches)
         );
+    }
 
+    public function testAddPaddingEdgesNone() : void {
         // Both edges none.
         $patches = $this->p->make("XXXXYYYY", "XXXXtestYYYY");
         $this->assertEquals("@@ -1,8 +1,12 @@\n XXXX\n+test\n YYYY\n", $this->p->toText($patches));
@@ -271,8 +284,7 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testApply()
-    {
+    public function testApplyNull() : void {
         $this->m->setDistance(1000);
         $this->m->setThreshold(0.5);
         $this->p->setDeleteTreshold(0.5);
@@ -283,6 +295,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("Hello world.", array()),
             $this->p->apply($patches, "Hello world.")
         );
+    }
+
+    public function testApplyExactMatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Exact match.
         $patches = $this->p->make("The quick brown fox jumps over the lazy dog.", "That quick brown fox jumped over a lazy dog.");
@@ -290,18 +308,40 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("That quick brown fox jumped over a lazy dog.", array(true, true,)),
             $this->p->apply($patches, "The quick brown fox jumps over the lazy dog.")
         );
+    }
+
+    public function testApplyPartialMatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
+
+        $patches = $this->p->make("The quick brown fox jumps over the lazy dog.", "That quick brown fox jumped over a lazy dog.");
 
         // Partial match.
         $this->assertEquals(
             array("That quick red rabbit jumped over a tired tiger.", array(true, true,)),
             $this->p->apply($patches, "The quick red rabbit jumps over the tired tiger.")
         );
+    }
+
+    public function testApplyFailedMatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
+
+        $patches = $this->p->make("The quick brown fox jumps over the lazy dog.", "That quick brown fox jumped over a lazy dog.");
 
         // Failed match.
         $this->assertEquals(
             array("I am the very model of a modern major general.", array(false, false,)),
             $this->p->apply($patches, "I am the very model of a modern major general.")
         );
+    }
+
+    public function testApplyBigDeleteSmallChange() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Big delete, small change.
         $patches = $this->p->make("x1234567890123456789012345678901234567890123456789012345678901234567890y", "xabcy");
@@ -309,6 +349,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("xabcy", array(true, true,)),
             $this->p->apply($patches, "x123456789012345678901234567890-----++++++++++-----123456789012345678901234567890y")
         );
+    }
+
+    public function testApplyBigDeleteBigChange1() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Big delete, big change 1.
         $patches = $this->p->make("x1234567890123456789012345678901234567890123456789012345678901234567890y", "xabcy");
@@ -316,6 +362,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("xabc12345678901234567890---------------++++++++++---------------12345678901234567890y", array(false, true,)),
             $this->p->apply($patches, "x12345678901234567890---------------++++++++++---------------12345678901234567890y")
         );
+    }
+
+    public function testApplyBigDeleteBigChange2() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Big delete, big change 2.
         $this->p->setDeleteTreshold(0.6);
@@ -324,6 +376,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("xabcy", array(true, true,)),
             $this->p->apply($patches, "x12345678901234567890---------------++++++++++---------------12345678901234567890y")
         );
+        $this->p->setDeleteTreshold(0.5);
+    }
+
+    public function testApplyCompensateForFailedPatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
         $this->p->setDeleteTreshold(0.5);
 
         // Compensate for failed patch.
@@ -336,6 +394,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
         );
         $this->m->setDistance(1000);
         $this->m->setThreshold(0.5);
+    }
+
+    public function testApplyNoSideEffects() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // No side effects.
         $patches = $this->p->make("", "test");
@@ -345,6 +409,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             $patchesText,
             $this->p->toText($patches)
         );
+    }
+
+    public function testApplyNoSideEffectsWithMajorDelete() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // No side effects with major delete.
         $patches = $this->p->make("The quick brown fox jumps over the lazy dog.", "Woof");
@@ -354,6 +424,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             $patchesText,
             $this->p->toText($patches)
         );
+    }
+
+    public function testApplyEdgeExactMatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Edge exact match.
         $patches = $this->p->make("", "test");
@@ -361,6 +437,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("test", array(true,)),
             $this->p->apply($patches, "")
         );
+    }
+
+    public function testApplyNearEdgeExactMatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Near edge exact match.
         $patches = $this->p->make("XY", "XtestY");
@@ -368,6 +450,12 @@ class PatchTest extends \PHPUnit\Framework\TestCase
             array("XtestY", array(true,)),
             $this->p->apply($patches, "XY")
         );
+    }
+
+    public function testApplyEdgePartialMatch() : void {
+        $this->m->setDistance(1000);
+        $this->m->setThreshold(0.5);
+        $this->p->setDeleteTreshold(0.5);
 
         // Edge partial match.
         $patches = $this->p->make("y", "y123");

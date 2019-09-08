@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -26,14 +26,12 @@ namespace DiffMatchPatch;
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  * @runTestsInSeparateProcesses
  */
-class PerformanceTest extends \PHPUnit\Framework\TestCase
-{
+class PerformanceTest extends \PHPUnit\Framework\TestCase {
     protected  function setUp() : void {
         mb_internal_encoding('UTF-8');
     }
 
-    public function testDiffMainPerformance()
-    {
+    public function testDiffMainPerformance() : void {
         $text1 = file_get_contents(__DIR__ . '/fixtures/S_performance1.txt');
         $text2 = file_get_contents(__DIR__ . '/fixtures/S_performance2.txt');
 
@@ -42,25 +40,25 @@ class PerformanceTest extends \PHPUnit\Framework\TestCase
         $diff->setTimeout(0);
         $diff->main($text1, $text2);
 
-        $timeStart = microtime(1);
+        $timeStart = microtime(true);
         $memoryStart = memory_get_usage();
 
         $diff = new Diff();
         $diff->setTimeout(0);
         $diff->main($text1, $text2);
 
-        $timeElapsed = microtime(1) - $timeStart;
+        $timeElapsed = microtime(true) - $timeStart;
         $memoryUsage = (memory_get_peak_usage() - $memoryStart) / 1024 / 1024;
 
         $this->assertLessThan(0.6, $timeElapsed);
         $this->assertLessThan(1, $memoryUsage);
 
+        echo PHP_EOL;
         echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
         echo 'Memory usage: ' . round($memoryUsage, 3) . PHP_EOL;
     }
 
-    public function testDiffMainMemoryLeaks()
-    {
+    public function testDiffMainMemoryLeaks() : void {
         $text1 = file_get_contents(__DIR__ . '/fixtures/S_performance1.txt');
         $text2 = file_get_contents(__DIR__ . '/fixtures/S_performance2.txt');
         $n = 20;
@@ -71,7 +69,7 @@ class PerformanceTest extends \PHPUnit\Framework\TestCase
         $diff->main($text1, $text2);
         unset($diff);
 
-        $timeStart = microtime(1);
+        $timeStart = microtime(true);
         $memoryStart = memory_get_usage();
 
         for ($i = 0; $i < $n; $i++) {
@@ -81,14 +79,13 @@ class PerformanceTest extends \PHPUnit\Framework\TestCase
             unset($diff);
         }
 
-        $timeElapsed = microtime(1) - $timeStart;
+        $timeElapsed = microtime(true) - $timeStart;
         $memoryUsage = (memory_get_usage() - $memoryStart) / 1024 / 1024;
 
-        $this->assertLessThan(0.001, $memoryUsage);
+        $this->assertLessThan(0.5, $memoryUsage);
 
+        echo PHP_EOL;
         echo 'Elapsed time: ' . round($timeElapsed, 3) . PHP_EOL;
         echo 'Memory usage: ' . round($memoryUsage, 10) . PHP_EOL;
     }
-
-
 }

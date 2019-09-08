@@ -1,8 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * DiffMatchPatch is a port of the google-diff-match-patch
- * (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -39,82 +38,94 @@ class DiffToolkitTest extends \PHPUnit\Framework\TestCase {
         $this->dt = new DiffToolkit();
     }
 
-    public function testCommonPrefix()
-    {
-        // Detect any common prefix.
+    public function testCommonPrefixNull() : void {
         // Null case.
         $this->assertEquals(0, $this->dt->commonPrefix("abc", "xyz"));
+    }
 
+    public function testCommonPrefixNotNull() : void {
         // Non-null case.
         $this->assertEquals(4, $this->dt->commonPrefix("1234abcdef", "1234xyz"));
+    }
 
+    public function testCommonPrefixWhole() : void {
+        // Detect any common prefix.
         // Whole case.
         $this->assertEquals(4, $this->dt->commonPrefix("1234", "1234xyz"));
     }
 
-    public function testCommonSuffix()
-    {
+    public function testCommonSuffixNull() : void {
         // Detect any common suffix.
         // Null case.
         $this->assertEquals(0, $this->dt->commonSuffix("abc", "xyz"));
+    }
 
+    public function testCommonSuffixNotNull() : void {
         // Non-null case.
         $this->assertEquals(4, $this->dt->commonSuffix("abcdef1234", "xyz1234"));
+    }
 
+    public function testCommonSuffixWhole() : void {
+        // Detect any common suffix.
         // Whole case.
         $this->assertEquals(4, $this->dt->commonSuffix("1234", "xyz1234"));
     }
 
-    public function testCommonOverlap()
-    {
+    public function testCommonOverlapNull() : void {
         # Null case.
         $this->assertEquals(0, $this->dt->commontOverlap("", "abcd"));
+    }
 
+    public function testCommonOverlapWhole() : void {
         // Whole case.
         $this->assertEquals(3, $this->dt->commontOverlap("abc", "abcd"));
+    }
 
+    public function testCommonOverlapNoOverlap() : void {
         // No overlap.
         $this->assertEquals(0, $this->dt->commontOverlap("123456", "abcd"));
+    }
 
+    public function testCommonOverlap() : void {
         // Overlap.
         $this->assertEquals(3, $this->dt->commontOverlap("123456xxx", "xxxabcd"));
+    }
 
+    public function testCommonOverlapUnicode() : void {
         // Unicode.
         // Some overly clever languages (C#) may treat ligatures as equal to their
         // component letters.  E.g. U+FB01 == 'fi'
         $this->assertEquals(0, $this->dt->commontOverlap("fi", json_decode('"\ufb01"')));
     }
 
-    public function testHalfMatch()
-    {
+    public function testHalfMatchNoMatch() : void {
         // No match.
         $this->assertNull($this->dt->halfMatch("1234567890", "abcdef"));
         $this->assertNull($this->dt->halfMatch("12345", "23"));
+    }
 
+    public function testHalfMatchSingleMatch() : void {
         // Single Match.
         $this->assertEquals(array("12", "90", "a", "z", "345678"), $this->dt->halfMatch("1234567890", "a345678z"));
         $this->assertEquals(array("a", "z", "12", "90", "345678"), $this->dt->halfMatch("a345678z", "1234567890"));
         $this->assertEquals(array("abc", "z", "1234", "0", "56789"), $this->dt->halfMatch("abc56789z", "1234567890"));
         $this->assertEquals(array("a", "xyz", "1", "7890", "23456"), $this->dt->halfMatch("a23456xyz", "1234567890"));
+    }
 
+    public function testHalfMatchMultipleMatches() : void {
         // Multiple Matches.
         $this->assertEquals(array("12123", "123121", "a", "z", "1234123451234"), $this->dt->halfMatch("121231234123451234123121", "a1234123451234z"));
         $this->assertEquals(array("", "-=-=-=-=-=", "x", "", "x-=-=-=-=-=-=-="), $this->dt->halfMatch("x-=-=-=-=-=-=-=-=-=-=-=-=", "xx-=-=-=-=-=-=-="));
         $this->assertEquals(array("-=-=-=-=-=", "", "", "y", "-=-=-=-=-=-=-=y"), $this->dt->halfMatch("-=-=-=-=-=-=-=-=-=-=-=-=y", "-=-=-=-=-=-=-=yy"));
+    }
 
-
+    public function testHalfMatchNonOptimalHalfmatch() : void {
         // Non-optimal halfmatch.
         // Optimal diff would be -q+x=H-i+e=lloHe+Hu=llo-Hew+y not -qHillo+x=HelloHe-w+Hulloy
         $this->assertEquals(array("qHillo", "w", "x", "Hulloy", "HelloHe"), $this->dt->halfMatch("qHilloHelloHew", "xHelloHeHulloy"));
-
-        // Optimal no halfmatch.
-        // FIXME move to copute() test
-//        $this->dt->setTimeout(0);
-//        $this->assertNull($this->dt->halfMatch("qHilloHelloHew", "xHelloHeHulloy"));
     }
 
-    public function testLinesToChars()
-    {
+    public function testLinesToChars() : void {
         // TODO throw exception, if charset is one-byte
         mb_internal_encoding('UTF-8');
 
@@ -139,7 +150,7 @@ class DiffToolkitTest extends \PHPUnit\Framework\TestCase {
 
         for ($x = 1; $x <= $n; $x++) {
             $lineList[] = $x . "\n";
-            $charList[] = Utils::unicodeChr($x);
+            $charList[] = mb_chr($x);
         }
         $this->assertCount($n, $lineList);
 
@@ -154,16 +165,15 @@ class DiffToolkitTest extends \PHPUnit\Framework\TestCase {
         );
     }
 
-    public function testCharsToLines()
-    {
+    public function testCharsToLines() : void {
         // Convert chars up to lines.
         $diffs = array(
-            array(Diff::EQUAL, "\x01\x02\x01"),
+            array(Diff::EQUAL,  "\x01\x02\x01"),
             array(Diff::INSERT, "\x02\x01\x02")
         );
         $this->dt->charsToLines($diffs, array("", "alpha\n", "beta\n"));
         $this->assertEquals(array(
-            array(Diff::EQUAL, "alpha\nbeta\nalpha\n"),
+            array(Diff::EQUAL,  "alpha\nbeta\nalpha\n"),
             array(Diff::INSERT, "beta\nalpha\nbeta\n")
         ), $diffs);
 
@@ -173,8 +183,8 @@ class DiffToolkitTest extends \PHPUnit\Framework\TestCase {
         $charList = array();
 
         for ($x = 1; $x <= $n; $x++) {
-            $lineList[] = $x . "\n";
-            $charList[] = Utils::unicodeChr($x);
+            $lineList[] = "$x\n";
+            $charList[] = mb_chr($x);
         }
         $this->assertCount($n, $lineList);
 

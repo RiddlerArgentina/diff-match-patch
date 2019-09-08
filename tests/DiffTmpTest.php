@@ -1,8 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * DiffMatchPatch is a port of the google-diff-match-patch
- * (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -39,28 +38,28 @@ class DiffTmpTest extends \PHPUnit\Framework\TestCase {
         $this->d = new Diff();
     }
 
-    public function testTmp()
-    {
-//        function rebuildtexts($diffs) {
-//            // Construct the two texts which made up the diff originally.
-//            $text1 = "";
-//            $text2 = "";
-//            foreach ($diffs as $change) {
-//                if ($change[0] != Diff::INSERT) {
-//                    $text1 .= $change[1];
-//                }
-//                if ($change[0] != Diff::DELETE) {
-//                    $text2 .= $change[1];
-//                }
-//            }
-//            return array($text1, $text2);
-//        }
-//        // Overlap line-mode.
-//        $a = str_repeat("1234567890\n", 13);
-//        $b = "abcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n";
-//        $this->assertEquals(
-//            rebuildtexts($this->d->main($a, $b, false)->getChanges()),
-//            rebuildtexts($this->d->main($a, $b, true)->getChanges())
-//        );
+    public function testTmp() : void {
+        // Overlap line-mode.
+        $a = str_repeat("1234567890\n", 13);
+        $b = "abcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n1234567890\n1234567890\n1234567890\nabcdefghij\n";
+        $this->assertEquals(
+            $this->rebuildtexts($this->d->main($a, $b, false)->getChanges()),
+            $this->rebuildtexts($this->d->main($a, $b, true )->getChanges())
+        );
+    }
+
+    function rebuildtexts(array $diffs) : array {
+        // Construct the two texts which made up the diff originally.
+        $text1 = "";
+        $text2 = "";
+        foreach ($diffs as $change) {
+            if ($change[0] != Diff::INSERT) {
+                $text1 .= $change[1];
+            }
+            if ($change[0] != Diff::DELETE) {
+                $text2 .= $change[1];
+            }
+        }
+        return array($text1, $text2);
     }
 }

@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -26,8 +26,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class MatchTest extends \PHPUnit\Framework\TestCase
-{
+class MatchTest extends \PHPUnit\Framework\TestCase {
     /**
      * @var Match
      */
@@ -39,8 +38,7 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         $this->m = new Match();
     }
 
-    public function testAlphabet()
-    {
+    public function testAlphabet() : void {
         // Initialise the bitmasks for Bitap.
         $this->assertEquals(array(
             "a" => 4,
@@ -55,14 +53,18 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         ), $this->m->alphabet("abcaba"));
     }
 
-    public function testBitap(){
+    public function testBitapExactMatches() : void {
         $this->m->setDistance(100);
         $this->m->setThreshold(0.5);
 
         // Exact matches.
         $this->assertEquals(5, $this->m->bitap("abcdefghijk", "fgh", 5));
-
         $this->assertEquals(5, $this->m->bitap("abcdefghijk", "fgh", 0));
+    }
+
+    public function testBitapFuzzyMatches() : void {
+        $this->m->setDistance(100);
+        $this->m->setThreshold(0.5);
 
         // Fuzzy matches.
         $this->assertEquals(4, $this->m->bitap("abcdefghijk", "efxhi", 0));
@@ -70,6 +72,11 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(2, $this->m->bitap("abcdefghijk", "cdefxyhijk", 5));
 
         $this->assertEquals(-1, $this->m->bitap("abcdefghijk", "bxy", 1));
+    }
+
+    public function testBitapOverflow() : void {
+        $this->m->setDistance(100);
+        $this->m->setThreshold(0.5);
 
         // Overflow.
         $this->assertEquals(2, $this->m->bitap("123456789xx0", "3456789x0", 2));
@@ -79,6 +86,11 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(3, $this->m->bitap("abcdef", "defyy", 4));
 
         $this->assertEquals(0, $this->m->bitap("abcdef", "xabcdefy", 0));
+    }
+
+    public function testBitapThreshold() : void {
+        $this->m->setDistance(100);
+        $this->m->setThreshold(0.5);
 
         // Threshold test.
         $this->m->setThreshold(0.4);
@@ -91,11 +103,21 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(1, $this->m->bitap("abcdefghijk", "bcdef", 1));
 
         $this->m->setThreshold(0.5);
+    }
+
+    public function testBitapMultipleSelect() : void {
+        $this->m->setDistance(100);
+        $this->m->setThreshold(0.5);
 
         // Multiple select.
         $this->assertEquals(0, $this->m->bitap("abcdexyzabcde", "abccde", 3));
 
         $this->assertEquals(8, $this->m->bitap("abcdexyzabcde", "abccde", 5));
+    }
+
+    public function testBitapDistanceStrictLocation() : void {
+        $this->m->setDistance(100);
+        $this->m->setThreshold(0.5);
 
         // Distance test.
         // Strict location.
@@ -103,13 +125,19 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(-1, $this->m->bitap("abcdefghijklmnopqrstuvwxyz", "abcdefg", 24));
 
         $this->assertEquals(0, $this->m->bitap("abcdefghijklmnopqrstuvwxyz", "abcdxxefg", 1));
+    }
 
+    public function testBitapDistanceLooseLocation() : void {
+        $this->m->setDistance(100);
+        $this->m->setThreshold(0.5);
+
+        // Distance test.
         //Loose location.
         $this->m->setDistance(1000);
         $this->assertEquals(0, $this->m->bitap("abcdefghijklmnopqrstuvwxyz", "abcdefg", 24));
     }
 
-    public function testMain(){
+    public function testMain() {
         // Full match.
         // Shortcut matches.
         $this->assertEquals(0, $this->m->main("abcdef", "abcdef", 1000));
@@ -128,13 +156,10 @@ class MatchTest extends \PHPUnit\Framework\TestCase
         $this->m->setThreshold(0.7);
         $this->assertEquals(4, $this->m->main("I am the very model of a modern major general.", " that berry ", 5));
         $this->m->setThreshold(0.5);
+    }
 
-        // Test null inputs.
-        try {
+    public function testNulls() : void {
+        $this->expectException(\TypeError::class);
             $this->m->main(null, null, 0);
-            $this->fail();
-        } catch (\InvalidArgumentException $e) {
-
-        }
     }
 }

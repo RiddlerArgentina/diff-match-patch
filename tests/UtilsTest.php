@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -32,24 +32,22 @@ class UtilsTest extends \PHPUnit\Framework\TestCase
         mb_internal_encoding('UTF-8');
     }
 
-    public function testUnicodeChr()
-    {
-        $this->assertEquals('a', Utils::unicodeChr(97));
-        $this->assertEquals('ÿ', Utils::unicodeChr(255));
-        $this->assertEquals('Ā', Utils::unicodeChr(256));
-        $this->assertEquals('Ą', Utils::unicodeChr(260));
-//        $this->assertEquals('𐀀', Utils::unicodeChr(65536));
-//        $this->assertEquals('😺', Utils::unicodeChr(128570));
+    public function testUnicodeChr() : void {
+        $this->assertEquals(mb_chr(97), Utils::unicodeChr(97));
+        $this->assertEquals(mb_chr(255), Utils::unicodeChr(255));
+        $this->assertEquals(mb_chr(256), Utils::unicodeChr(256));
+        $this->assertEquals(mb_chr(260), Utils::unicodeChr(260));
+//        $this->assertEquals(mb_chr(65536), Utils::unicodeChr(65536));
+//        $this->assertEquals(mb_chr(128570), Utils::unicodeChr(128570));
     }
 
-    public function testUnicodeOrd()
-    {
-        $this->assertEquals(97, Utils::unicodeOrd('a'));
-        $this->assertEquals(255, Utils::unicodeOrd('ÿ'));
-        $this->assertEquals(256, Utils::unicodeOrd('Ā'));
-        $this->assertEquals(260, Utils::unicodeOrd('Ą'));
-//        $this->assertEquals(65536, Utils::unicodeOrd('𐀀'));
-//        $this->assertEquals(128570, Utils::unicodeOrd('😺'));
+    public function testUnicodeOrd() : void {
+        $this->assertEquals(mb_ord('a'), Utils::unicodeOrd('a'));
+        $this->assertEquals(mb_ord('ÿ'), Utils::unicodeOrd('ÿ'));
+        $this->assertEquals(mb_ord('Ā'), Utils::unicodeOrd('Ā'));
+        $this->assertEquals(mb_ord('Ą'), Utils::unicodeOrd('Ą'));
+//        $this->assertEquals(mb_ord('𐀀'), Utils::unicodeOrd('𐀀'));
+//        $this->assertEquals(mb_ord('😺'), Utils::unicodeOrd('😺'));
     }
 
 
