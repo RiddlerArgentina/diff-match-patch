@@ -1,11 +1,16 @@
 {
-    "name": "yetanotherape/diff-match-patch",
+    "name": "riddler/diff-match-patch",
     "description": "Port of the google-diff-match-patch (https://code.google.com/p/google-diff-match-patch/) lib to PHP",
     "type": "library",
     "keywords": ["Diff", "Match", "Patch", "Fuzzy search"],
     "homepage": "https://code.google.com/p/google-diff-match-patch/",
     "license": "Apache-2.0",
     "authors": [
+        {
+            "name": "Federico Vera",
+            "email": "fede@riddler.com.ar",
+            "homepage": "https://www.riddler.com.ar/"
+        },
         {
             "name": "Daniil Skrobov",
             "email": "yetanotherape@gmail.com"
@@ -16,19 +21,21 @@
             "homepage": "http://neil.fraser.name/"
         }
     ],
+    "optimize-autoloader": true,
+    "classmap-authoritative": true,
     "require": {
         "php": "^7.2",
         "ext-iconv": "*",
-        "ext-json": "*",
         "ext-mbstring": "*"
     },
     "require-dev": {
+        "ext-json": "*",
         "phpunit/phpunit": "^8.1",
         "phpunit/php-code-coverage": "^7.0"
     },
     "autoload": {
         "psr-4": {
-            "DiffMatchPatch\\": "src"
+            "DiffMatchPatch\\": "src/"
         }
     }
 }
