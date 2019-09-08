@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -28,7 +28,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class Match {
+final class Match {
 
     /**
      * @var float At what point is no match declared (0.0 = perfection, 1.0 = very loose).
@@ -45,68 +45,58 @@ class Match {
      */
     protected $maxBits;
 
-    public function __construct()
-    {
+    public function __construct() {
         // PHP_INT_SIZE == 4 for 32bit platform, and 8 — for 64bit
         $this->maxBits = PHP_INT_SIZE * 8;
     }
 
-
     /**
      * @return float
      */
-    public function getThreshold()
-    {
+    public function getThreshold() : float {
         return $this->threshold;
     }
 
     /**
      * @param float $threshold
      */
-    public function setThreshold($threshold)
-    {
+    public function setThreshold(float $threshold) : void {
         $this->threshold = $threshold;
     }
 
     /**
      * @return int
      */
-    public function getDistance()
-    {
+    public function getDistance() : int {
         return $this->distance;
     }
 
     /**
      * @param int $distance
      */
-    public function setDistance($distance)
-    {
+    public function setDistance(int $distance) {
         $this->distance = $distance;
     }
 
     /**
      * @return int
      */
-    public function getMaxBits()
-    {
+    public function getMaxBits() : int {
         return $this->maxBits;
     }
 
     /**
      * @param int $maxBits
      *
-     * @throws \RangeException If param greater than number of bits in int.
+     * @throws \RangeException If $maxBits greater than number of bits in int.
      */
-    public function setMaxBits($maxBits)
-    {
+    public function setMaxBits(int $maxBits) : void {
         if ($maxBits <= PHP_INT_SIZE * 8) {
             $this->maxBits = $maxBits;
         } else {
             throw new \RangeException('Param greater than number of bits in int');
         }
     }
-
-
 
     /**
      * Locate the best instance of 'pattern' in 'text' near 'loc'.
@@ -118,25 +108,25 @@ class Match {
      * @throws \InvalidArgumentException If null inout.
      * @return int Best match index or -1.
      */
-    public function main($text, $pattern, $loc = 0){
+    public function main(string $text, string $pattern, int $loc = 0) : int {
         // Check for null inputs.
         if (!isset($text, $pattern)) {
             throw new \InvalidArgumentException("Null inputs.");
         }
 
         $loc = max(0, min($loc, mb_strlen($text)));
-        if ($text == $pattern) {
+        if ($text === $pattern) {
             // Shortcut (potentially not guaranteed by the algorithm)
             return 0;
-        } elseif ($text == '') {
+        } elseif (empty($text)) {
             // Nothing to match.
             return -1;
-        } elseif (mb_substr($text, $loc, mb_strlen($pattern)) == $pattern) {
+        } elseif (mb_substr($text, $loc, mb_strlen($pattern)) === $pattern) {
             // Perfect match at the perfect spot!  (Includes case of null pattern)
             return $loc;
         } else {
             // Do a fuzzy compare.
-            return  $this->bitap($text, $pattern, $loc);
+            return $this->bitap($text, $pattern, $loc);
         }
     }
 
@@ -151,8 +141,7 @@ class Match {
      * @throws \RangeException If pattern longer than number of bits in int.
      * @return int Best match index or -1.
      */
-    public function bitap($text, $pattern, $loc)
-    {
+    public function bitap(string $text, string $pattern, int $loc) : int {
         if ($this->getMaxBits() != 0 && $this->getMaxBits() < mb_strlen($pattern)) {
             throw new \RangeException('Pattern too long for this application.');
         }
@@ -199,7 +188,7 @@ class Match {
             }
             // Use the result from this iteration as the maximum for the next.
             $binMax = $binMid;
-            $start = max(1, $loc - $binMid + 1);
+            $start  = max(1, $loc - $binMid + 1);
             $finish = min($loc + $binMid, $textLen) + $patternLen;
 
             $rd = array_fill(0, $finish + 2, 0);
@@ -211,7 +200,8 @@ class Match {
                 } else {
                     $charMatch = isset($s[$text[$j - 1]]) ? $s[$text[$j - 1]] : 0;
                 }
-                if ($d == 0) {
+
+                if ($d === 0) {
                     // First pass: exact match.
                     $rd[$j] = (($rd[$j + 1] << 1) | 1) & $charMatch;
                 } else {
@@ -220,6 +210,7 @@ class Match {
                         ((($lastRd[$j + 1] | $lastRd[$j]) << 1) | 1) |
                         $lastRd[$j + 1];
                 }
+
                 if ($rd[$j] & $matchMask) {
                     $score = $this->bitapScore($d, $j - 1, $patternLen, $loc);
                     // This match will almost certainly be better than any existing match.
@@ -259,11 +250,10 @@ class Match {
      *
      * @return float Overall score for match (0.0 = good, 1.0 = bad).
      */
-    protected function bitapScore($errors, $matchLoc, $patternLen, $searchLoc)
-    {
+    protected function bitapScore(int $errors, int $matchLoc, int $patternLen, int $searchLoc) : float {
         $accuracy = $errors / $patternLen;
         $proximity = abs($searchLoc - $matchLoc);
-        if (!$this->getDistance()) {
+        if ($this->getDistance() === 0) {
             // Dodge divide by zero error.
             return $proximity ? 1.0 : $accuracy;
         }
@@ -277,8 +267,7 @@ class Match {
      *
      * @return array Hash of character locations.
      */
-    public function alphabet($pattern)
-    {
+    public function alphabet(string $pattern) : array {
         $s = array();
         foreach (preg_split("//u", $pattern, -1, PREG_SPLIT_NO_EMPTY) as $char) {
             $s[$char] = 0;

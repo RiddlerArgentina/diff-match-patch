@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -28,7 +28,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class DiffToolkit {
+final class DiffToolkit {
     /**
      * Determine the common prefix of two strings.
      *
@@ -37,20 +37,21 @@ class DiffToolkit {
      *
      * @return int The number of characters common to the start of each string.
      */
-    public function commonPrefix($text1, $text2)
-    {
+    public function commonPrefix(string $text1, string $text2) : int {
         // Quick check for common null cases.
-        if ($text1 == '' || $text2 == '' || mb_substr($text1, 0, 1) != mb_substr($text2, 0, 1)) {
+        if (empty($text1) || empty($text2) || mb_substr($text1, 0, 1) !== mb_substr($text2, 0, 1)) {
             return 0;
         }
+
         // Binary search.
         // Performance analysis: http://neil.fraser.name/news/2007/10/09/
         $pointermin = 0;
         $pointermax = min(mb_strlen($text1), mb_strlen($text2));
         $pointermid = $pointermax;
         $pointerstart = 0;
+
         while ($pointermin < $pointermid) {
-            if (mb_substr($text1, $pointerstart, $pointermid - $pointerstart) == mb_substr($text2, $pointerstart,
+            if (mb_substr($text1, $pointerstart, $pointermid - $pointerstart) === mb_substr($text2, $pointerstart,
                     $pointermid - $pointerstart)
             ) {
                 $pointermin = $pointermid;
@@ -72,10 +73,9 @@ class DiffToolkit {
      *
      * @return int The number of characters common to the end of each string.
      */
-    public function commonSuffix($text1, $text2)
-    {
+    public function commonSuffix(string $text1, string $text2) : int {
         // Quick check for common null cases.
-        if ($text1 == '' || $text2 == '' || mb_substr($text1, -1, 1) != mb_substr($text2, -1, 1)) {
+        if (empty($text1) || empty($text2) || mb_substr($text1, -1, 1) !== mb_substr($text2, -1, 1)) {
             return 0;
         }
         // Binary search.
@@ -84,10 +84,10 @@ class DiffToolkit {
         $pointermax = min(mb_strlen($text1), mb_strlen($text2));
         $pointermid = $pointermax;
         $pointerend = 0;
+
         while ($pointermin < $pointermid) {
-            if (mb_substr($text1, -$pointermid, $pointermid - $pointerend) == mb_substr($text2, -$pointermid,
-                    $pointermid - $pointerend)
-            ) {
+            if (mb_substr($text1, -$pointermid, $pointermid - $pointerend) ===
+                mb_substr($text2, -$pointermid, $pointermid - $pointerend)) {
                 $pointermin = $pointermid;
                 $pointerend = $pointermin;
             } else {
@@ -105,10 +105,10 @@ class DiffToolkit {
      * @param string $text1 First string.
      * @param string $text2 Second string.
      *
-     * @return int The number of characters common to the end of the first string and the start of the second string.
+     * @return int The number of characters common to the end of the first string
+     * and the start of the second string.
      */
-    public function commontOverlap($text1, $text2)
-    {
+    public function commonOverlap(string $text1, string $text2) : int {
         // Cache the text lengths to prevent multiple calls.
         $text1_length = mb_strlen($text1);
         $text2_length = mb_strlen($text2);
@@ -127,7 +127,7 @@ class DiffToolkit {
         $text_length = min($text1_length, $text2_length);
 
         // Quick check for the worst case.
-        if ($text1 == $text2) {
+        if ($text1 === $text2) {
             return $text_length;
         }
 
@@ -138,12 +138,14 @@ class DiffToolkit {
         $length = 1;
         while (true) {
             $pattern = mb_substr($text1, -$length);
-            $found = mb_strpos($text2, $pattern);
+            $found   = mb_strpos($text2, $pattern);
+
             if ($found === false) {
                 break;
             }
+
             $length += $found;
-            if ($found == 0 || mb_substr($text1, -$length) == mb_substr($text2, 0, $length)) {
+            if ($found === 0 || mb_substr($text1, -$length) === mb_substr($text2, 0, $length)) {
                 $best = $length;
                 $length += 1;
             }
@@ -153,26 +155,27 @@ class DiffToolkit {
     }
 
     /**
-     * Do the two texts share a substring which is at least half the length of the longer text?
+     * Do the two texts share a substring which is at least half the length of the
+     * longer text?
      * This speedup can produce non-minimal diffs.
      *
      * @param string $text1 First string.
      * @param string $text2 Second string.
      *
-     * @return null|array Five element array, containing the prefix of text1, the suffix of text1,
-     * the prefix of text2, the suffix of text2 and the common middle.  Or null if there was no match.
+     * @return null|array Five element array, containing the prefix of text1, the
+     * suffix of text1, the prefix of text2, the suffix of text2 and the common
+     * middle. Or null if there was no match.
      */
-    public function halfMatch($text1, $text2)
-    {
+    public function halfMatch(string $text1, string $text2) : ?array {
         if (mb_strlen($text1) > mb_strlen($text2)) {
-            $longtext = $text1;
+            $longtext  = $text1;
             $shorttext = $text2;
         } else {
             $shorttext = $text1;
-            $longtext = $text2;
+            $longtext  = $text2;
         }
 
-        if (mb_strlen($longtext) < 4 || mb_strlen($shorttext) * 2 < mb_strlen(mb_strlen($longtext))) {
+        if ((mb_strlen($longtext) < 4) || ((mb_strlen($shorttext) * 2) < mb_strlen($longtext))) {
             // Pointless
             return null;
         }
@@ -190,7 +193,7 @@ class DiffToolkit {
             $hm = $hm2;
         } else {
             // Both matched.  Select the longest.
-            if (mb_strlen($hm1[4] > $hm2[4])) {
+            if (mb_strlen($hm1[4]) > mb_strlen($hm2[4])) {
                 $hm = $hm1;
             } else {
                 $hm = $hm2;
@@ -211,13 +214,14 @@ class DiffToolkit {
      *
      * @param string $longtext  Longer string.
      * @param string $shorttext Shorter string.
-     * @param int    $i         Start index of quarter length substring within longtext.
+     * @param int    $i         Start index of quarter length substring within
+     * longtext.
      *
-     * @return null|array Five element array, containing the prefix of longtext, the suffix of longtext,
-     * the prefix of shorttext, the suffix of shorttext and the common middle.  Or null if there was no match.
+     * @return null|array Five element array, containing the prefix of longtext,
+     * the suffix of longtext, the prefix of shorttext, the suffix of shorttext
+     * and the common middle. Or null if there was no match.
      */
-    protected function halfMatchI($longtext, $shorttext, $i)
-    {
+    protected function halfMatchI(string $longtext, string $shorttext, int $i) : ?array {
         $seed = mb_substr($longtext, $i, (int)(mb_strlen($longtext) / 4));
         $best_common = $best_longtext_a = $best_longtext_b = $best_shorttext_a = $best_shorttext_b = '';
 
@@ -226,36 +230,41 @@ class DiffToolkit {
             $prefixLegth = $this->commonPrefix(mb_substr($longtext, $i), mb_substr($shorttext, $j));
             $suffixLegth = $this->commonSuffix(mb_substr($longtext, 0, $i), mb_substr($shorttext, 0, $j));
             if (mb_strlen($best_common) < $suffixLegth + $prefixLegth) {
-                $best_common = mb_substr($shorttext, $j - $suffixLegth, $suffixLegth) . mb_substr($shorttext, $j,
-                        $prefixLegth);
-                $best_longtext_a = mb_substr($longtext, 0, $i - $suffixLegth);
-                $best_longtext_b = mb_substr($longtext, $i + $prefixLegth);
+                $best_common      = mb_substr($shorttext, $j - $suffixLegth, $suffixLegth)
+                                  . mb_substr($shorttext, $j, $prefixLegth);
+                $best_longtext_a  = mb_substr($longtext, 0,  $i - $suffixLegth);
+                $best_longtext_b  = mb_substr($longtext,     $i + $prefixLegth);
                 $best_shorttext_a = mb_substr($shorttext, 0, $j - $suffixLegth);
-                $best_shorttext_b = mb_substr($shorttext, $j + $prefixLegth);
+                $best_shorttext_b = mb_substr($shorttext,    $j + $prefixLegth);
             }
             $j = mb_strpos($shorttext, $seed, $j + 1);
         }
 
-
         if (mb_strlen($best_common) * 2 >= mb_strlen($longtext)) {
-            return array($best_longtext_a, $best_longtext_b, $best_shorttext_a, $best_shorttext_b, $best_common);
-        } else {
-            return null;
+            return array(
+                $best_longtext_a,
+                $best_longtext_b,
+                $best_shorttext_a,
+                $best_shorttext_b,
+                $best_common
+            );
         }
+
+        return null;
     }
 
     /**
-     * Split two texts into an array of strings.  Reduce the texts to a string of hashes where each
-     * Unicode character represents one line.
+     * Split two texts into an array of strings.  Reduce the texts to a string of
+     * hashes where each Unicode character represents one line.
      *
      * @param string $text1 First string.
      * @param string $text2 Second string.
      *
-     * @return array Three element array, containing the encoded text1, the encoded text2 and the array
-     * of unique strings.  The zeroth element of the array of unique strings is intentionally blank.
+     * @return array Three element array, containing the encoded text1, the
+     * encoded text2 and the array of unique strings. The zeroth element of the
+     * array of unique strings is intentionally blank.
      */
-    public function linesToChars($text1, $text2)
-    {
+    public function linesToChars(string $text1, string $text2) : array {
         // e.g. $lineArray[4] == "Hello\n"
         $lineArray = array();
         // e.g. $lineHash["Hello\n"] == 4
@@ -282,8 +291,7 @@ class DiffToolkit {
      *
      * @return string Encoded string.
      */
-    protected function linesToCharsMunge($text, array &$lineArray, array &$lineHash)
-    {
+    protected function linesToCharsMunge(string $text, array &$lineArray, array &$lineHash) : string {
         // Simple string concat is even faster than implode() in PHP.
         $chars = '';
 

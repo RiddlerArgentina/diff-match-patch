@@ -73,29 +73,29 @@ class DiffToolkitTest extends \PHPUnit\Framework\TestCase {
 
     public function testCommonOverlapNull() : void {
         # Null case.
-        $this->assertEquals(0, $this->dt->commontOverlap("", "abcd"));
+        $this->assertEquals(0, $this->dt->commonOverlap("", "abcd"));
     }
 
     public function testCommonOverlapWhole() : void {
         // Whole case.
-        $this->assertEquals(3, $this->dt->commontOverlap("abc", "abcd"));
+        $this->assertEquals(3, $this->dt->commonOverlap("abc", "abcd"));
     }
 
     public function testCommonOverlapNoOverlap() : void {
         // No overlap.
-        $this->assertEquals(0, $this->dt->commontOverlap("123456", "abcd"));
+        $this->assertEquals(0, $this->dt->commonOverlap("123456", "abcd"));
     }
 
     public function testCommonOverlap() : void {
         // Overlap.
-        $this->assertEquals(3, $this->dt->commontOverlap("123456xxx", "xxxabcd"));
+        $this->assertEquals(3, $this->dt->commonOverlap("123456xxx", "xxxabcd"));
     }
 
     public function testCommonOverlapUnicode() : void {
         // Unicode.
         // Some overly clever languages (C#) may treat ligatures as equal to their
         // component letters.  E.g. U+FB01 == 'fi'
-        $this->assertEquals(0, $this->dt->commontOverlap("fi", json_decode('"\ufb01"')));
+        $this->assertEquals(0, $this->dt->commonOverlap("fi", json_decode('"\ufb01"')));
     }
 
     public function testHalfMatchNoMatch() : void {

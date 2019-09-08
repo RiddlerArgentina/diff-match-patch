@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -28,8 +28,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class Diff
-{
+final class Diff {
     /**
      * The data structure representing a diff is an array of arrays:
      * array(
@@ -73,8 +72,7 @@ class Diff
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct($text1 = null, $text2 = null)
-    {
+    public function __construct(?string $text1 = null, ?string $text2 = null) {
         $this->toolkit = new DiffToolkit();
 
         if (isset($text1, $text2)) {
@@ -87,8 +85,7 @@ class Diff
     /**
      * @return float
      */
-    public function getTimeout()
-    {
+    public function getTimeout() : float {
         return $this->timeout;
     }
 
@@ -97,8 +94,7 @@ class Diff
      *
      * @return $this
      */
-    public function setTimeout($timeout)
-    {
+    public function setTimeout(float $timeout) : Diff {
         $this->timeout = $timeout;
 
         return $this;
@@ -107,8 +103,7 @@ class Diff
     /**
      * @return int
      */
-    public function getEditCost()
-    {
+    public function getEditCost() : int {
         return $this->editCost;
     }
 
@@ -117,8 +112,7 @@ class Diff
      *
      * @return $this
      */
-    public function setEditCost($editCost)
-    {
+    public function setEditCost(int $editCost) : Diff {
         $this->editCost = $editCost;
 
         return $this;
@@ -127,8 +121,7 @@ class Diff
     /**
      * @return array
      */
-    public function getChanges()
-    {
+    public function getChanges() : array {
         return $this->changes;
     }
 
@@ -137,37 +130,27 @@ class Diff
      *
      * @return $this
      */
-    public function setChanges($changes)
-    {
+    public function setChanges(array $changes) : Diff {
         $this->changes = $changes;
-
         return $this;
     }
 
     /**
      * @return \DiffMatchPatch\DiffToolkit
      */
-    public function getToolkit()
-    {
+    public function getToolkit() : DiffToolkit {
         return $this->toolkit;
     }
-
-
 
     /**
      * @param \DiffMatchPatch\DiffToolkit $toolkit
      *
      * @return $this
      */
-    public function setToolkit($toolkit)
-    {
+    public function setToolkit(DiffToolkit $toolkit) : Diff {
         $this->toolkit = $toolkit;
-
         return $this;
     }
-
-
-
 
     /**
      * Reorder and merge like edit sections.  Merge equalities.
@@ -175,8 +158,7 @@ class Diff
      *
      * @return $this
      */
-    public function cleanupMerge()
-    {
+    public function cleanupMerge() : Diff {
         $diffs = $this->getChanges();
 
         $diffs[] = array(
@@ -190,23 +172,23 @@ class Diff
         $text_delete = '';
         $text_insert = '';
         while ($pointer < count($diffs)) {
-            if ($diffs[$pointer][0] == self::INSERT) {
+            if ($diffs[$pointer][0] === self::INSERT) {
                 $count_insert++;
                 $text_insert .= $diffs[$pointer][1];
                 $pointer++;
-            } elseif ($diffs[$pointer][0] == self::DELETE) {
+            } elseif ($diffs[$pointer][0] === self::DELETE) {
                 $count_delete++;
                 $text_delete .= $diffs[$pointer][1];
                 $pointer++;
-            } elseif ($diffs[$pointer][0] == self::EQUAL) {
+            } elseif ($diffs[$pointer][0] === self::EQUAL) {
                 // Upon reaching an equality, check for prior redundancies.
                 if ($count_delete + $count_insert > 1) {
-                    if ($count_delete != 0 && $count_insert != 0) {
+                    if ($count_delete !== 0 && $count_insert !== 0) {
                         // Factor out any common prefixies.
                         $commonlength = $this->getToolkit()->commonPrefix($text_insert, $text_delete);
-                        if ($commonlength != 0) {
+                        if ($commonlength !== 0) {
                             $x = $pointer - $count_delete - $count_insert - 1;
-                            if ($x >= 0 && $diffs[$x][0] == self::EQUAL) {
+                            if ($x >= 0 && $diffs[$x][0] === self::EQUAL) {
                                 $diffs[$x][1] .= mb_substr($text_insert, 0, $commonlength);
                             } else {
                                 array_unshift($diffs, array(
@@ -220,19 +202,19 @@ class Diff
                         }
                         // Factor out any common suffixies.
                         $commonlength = $this->getToolkit()->commonSuffix($text_insert, $text_delete);
-                        if ($commonlength != 0) {
+                        if ($commonlength !== 0) {
                             $diffs[$pointer][1] = mb_substr($text_insert, -$commonlength) . $diffs[$pointer][1];
                             $text_insert = mb_substr($text_insert, 0, -$commonlength);
                             $text_delete = mb_substr($text_delete, 0, -$commonlength);
                         }
                     }
                     // Delete the offending records and add the merged ones.
-                    if ($count_delete == 0) {
+                    if ($count_delete === 0) {
                         array_splice($diffs, $pointer - $count_insert, $count_insert, array(array(
                             self::INSERT,
                             $text_insert,
                         )));
-                    } elseif ($count_insert == 0) {
+                    } elseif ($count_insert === 0) {
                         array_splice($diffs, $pointer - $count_delete, $count_delete, array(array(
                             self::DELETE,
                             $text_delete,
@@ -250,13 +232,13 @@ class Diff
                         ));
                     }
                     $pointer = $pointer - $count_delete - $count_insert + 1;
-                    if ($count_delete != 0) {
+                    if ($count_delete !== 0) {
                         $pointer += 1;
                     }
-                    if ($count_insert != 0) {
+                    if ($count_insert !== 0) {
                         $pointer += 1;
                     }
-                } elseif ($pointer != 0 && $diffs[$pointer - 1][0] == self::EQUAL) {
+                } elseif ($pointer !== 0 && $diffs[$pointer - 1][0] === self::EQUAL) {
                     // Merge this equality with the previous one.
                     $diffs[$pointer - 1][1] .= $diffs[$pointer][1];
                     array_splice($diffs, $pointer, 1);
@@ -270,7 +252,7 @@ class Diff
             }
         }
 
-        if ($diffs[count($diffs) - 1][1] == '') {
+        if ($diffs[count($diffs) - 1][1] === '') {
             array_pop($diffs);
         }
 
@@ -281,15 +263,15 @@ class Diff
         $pointer = 1;
         // Intentionally ignore the first and last element (don't need checking).
         while ($pointer < count($diffs) - 1) {
-            if ($diffs[$pointer - 1][0] == self::EQUAL && $diffs[$pointer + 1][0] == self::EQUAL) {
+            if ($diffs[$pointer - 1][0] === self::EQUAL && $diffs[$pointer + 1][0] === self::EQUAL) {
                 // This is a single edit surrounded by equalities.
-                if (mb_substr($diffs[$pointer][1], -mb_strlen($diffs[$pointer - 1][1])) == $diffs[$pointer - 1][1]) {
+                if (mb_substr($diffs[$pointer][1], -mb_strlen($diffs[$pointer - 1][1])) === $diffs[$pointer - 1][1]) {
                     // Shift the edit over the previous equality.
                     $diffs[$pointer][1] = $diffs[$pointer - 1][1] . mb_substr($diffs[$pointer][1], 0, -mb_strlen($diffs[$pointer - 1][1]));
                     $diffs[$pointer + 1][1] = $diffs[$pointer - 1][1] . $diffs[$pointer + 1][1];
                     array_splice($diffs, $pointer - 1, 1);
                     $changes = true;
-                } elseif (mb_substr($diffs[$pointer][1], 0, mb_strlen($diffs[$pointer + 1][1])) == $diffs[$pointer + 1][1]) {
+                } elseif (mb_substr($diffs[$pointer][1], 0, mb_strlen($diffs[$pointer + 1][1])) === $diffs[$pointer + 1][1]) {
                     // Shift the edit over the next equality.
                     $diffs[$pointer - 1][1] = $diffs[$pointer - 1][1] . $diffs[$pointer + 1][1];
                     $diffs[$pointer][1] = mb_substr($diffs[$pointer][1], mb_strlen($diffs[$pointer + 1][1])) . $diffs[$pointer + 1][1];
@@ -316,14 +298,13 @@ class Diff
      *
      * @return $this
      */
-    public function cleanupSemanticLossless()
-    {
+    public function cleanupSemanticLossless() : Diff {
         $diffs = $this->getChanges();
 
         $pointer = 1;
         // Intentionally ignore the first and last element (don't need checking).
         while ($pointer < count($diffs) - 1) {
-            if ($diffs[$pointer - 1][0] == self::EQUAL && $diffs[$pointer + 1][0] == self::EQUAL) {
+            if ($diffs[$pointer - 1][0] === self::EQUAL && $diffs[$pointer + 1][0] === self::EQUAL) {
                 // This is a single edit surrounded by equalities.
                 $equality1 = $diffs[$pointer - 1][1];
                 $edit = $diffs[$pointer][1];
@@ -343,7 +324,7 @@ class Diff
                 $bestEdit = $edit;
                 $bestEquality2 = $equality2;
                 $bestScore = $this->cleanupSemanticScore($equality1, $edit) + $this->cleanupSemanticScore($edit, $equality2);
-                while ($edit && $equality2 && mb_substr($edit, 0, 1) == mb_substr($equality2, 0, 1)) {
+                while ($edit && $equality2 && mb_substr($edit, 0, 1) === mb_substr($equality2, 0, 1)) {
                     $equality1 .= mb_substr($edit, 0, 1);
                     $edit = mb_substr($edit, 1) . mb_substr($equality2, 0, 1);
                     $equality2 = mb_substr($equality2, 1);
@@ -356,16 +337,16 @@ class Diff
                         $bestEquality2 = $equality2;
                     }
                 }
-                if ($diffs[$pointer - 1][1] != $bestEquality1) {
+                if ($diffs[$pointer - 1][1] !== $bestEquality1) {
                     // We have an improvement, save it back to the diff.
-                    if ($bestEquality1 != '') {
+                    if ($bestEquality1 !== '') {
                         $diffs[$pointer - 1][1] = $bestEquality1;
                     } else {
                         array_splice($diffs, $pointer - 1, 1);
                         $pointer -= 1;
                     }
                     $diffs[$pointer][1] = $bestEdit;
-                    if ($bestEquality2 != '') {
+                    if ($bestEquality2 !== '') {
                         $diffs[$pointer + 1][1] = $bestEquality2;
                     } else {
                         array_splice($diffs, $pointer + 1, 1);
@@ -389,9 +370,8 @@ class Diff
      *
      * @return int The score.
      */
-    protected function cleanupSemanticScore($one, $two)
-    {
-        if ($one == '' || $two == '') {
+    protected function cleanupSemanticScore(string $one, string $two) : int {
+        if ($one === '' || $two === '') {
             // Edges are the best.
             return 6;
         }
@@ -438,8 +418,7 @@ class Diff
      *
      * @return $this
      */
-    public function cleanupSemantic()
-    {
+    public function cleanupSemantic() : Diff {
         $diffs = $this->getChanges();
 
         $changes = false;
@@ -457,7 +436,7 @@ class Diff
         $length_deletions2 = 0;
 
         while ($pointer < count($diffs)) {
-            if ($diffs[$pointer][0] == self::EQUAL) {
+            if ($diffs[$pointer][0] === self::EQUAL) {
                 $equalities[] = $pointer;
                 $length_insertions1 = $length_insertions2;
                 $length_insertions2 = 0;
@@ -465,7 +444,7 @@ class Diff
                 $length_deletions2 = 0;
                 $lastequality = $diffs[$pointer][1];
             } else {
-                if ($diffs[$pointer][0] == self::INSERT) {
+                if ($diffs[$pointer][0] === self::INSERT) {
                     $length_insertions2 += mb_strlen($diffs[$pointer][1]);
                 } else {
                     $length_deletions2 += mb_strlen($diffs[$pointer][1]);
@@ -485,10 +464,10 @@ class Diff
                     // Change second copy to insert.
                     $diffs[$insertPointer + 1][0] = self::INSERT;
                     // Throw away the previous equality (it needs to be reevaluated).
-                    if (count($equalities)) {
+                    if (!empty($equalities)) {
                         array_pop($equalities);
                     }
-                    if (count($equalities)) {
+                    if (!empty($equalities)) {
                         $pointer = end($equalities);
                     } else {
                         $pointer = -1;
@@ -523,11 +502,11 @@ class Diff
 
         $pointer = 1;
         while ($pointer < count($diffs)) {
-            if ($diffs[$pointer - 1][0] == self::DELETE && $diffs[$pointer][0] == self::INSERT) {
+            if ($diffs[$pointer - 1][0] === self::DELETE && $diffs[$pointer][0] === self::INSERT) {
                 $deletion = $diffs[$pointer - 1][1];
                 $insertion = $diffs[$pointer][1];
-                $overlap_length1 = $this->getToolkit()->commontOverlap($deletion, $insertion);
-                $overlap_length2 = $this->getToolkit()->commontOverlap($insertion, $deletion);
+                $overlap_length1 = $this->getToolkit()->commonOverlap($deletion, $insertion);
+                $overlap_length2 = $this->getToolkit()->commonOverlap($insertion, $deletion);
 
                 if ($overlap_length1 >= $overlap_length2) {
                     if ($overlap_length1 >= mb_strlen($deletion) / 2 || $overlap_length1 >= mb_strlen($insertion) / 2) {
@@ -574,7 +553,7 @@ class Diff
      *
      * @return $this
      */
-    public function cleanupEfficiency() {
+    public function cleanupEfficiency() : Diff {
         $diffs = $this->getChanges();
 
         $changes = false;
@@ -594,7 +573,7 @@ class Diff
         $post_del = false;
 
         while ($pointer < count($diffs)) {
-            if ($diffs[$pointer][0] == self::EQUAL) {
+            if ($diffs[$pointer][0] === self::EQUAL) {
                 if (mb_strlen($diffs[$pointer][1]) < $this->getEditCost() && ($post_ins || $post_del)) {
                     // Candidate found.
                     $equalities[] = $pointer;
@@ -609,7 +588,7 @@ class Diff
                 $post_ins = false;
                 $post_del = false;
             } else {
-                if ($diffs[$pointer][0] == self::DELETE) {
+                if ($diffs[$pointer][0] === self::DELETE) {
                     $post_del = true;
                 } else {
                     $post_ins = true;
@@ -628,7 +607,7 @@ class Diff
                         ($pre_ins && $pre_del && $post_ins && $post_del) ||
                         (
                             mb_strlen($lastequality) < $this->getEditCost() / 2 &&
-                            ($pre_ins + $pre_del + $post_del + $post_ins == 3)
+                            ($pre_ins + $pre_del + $post_del + $post_ins === 3)
                         )
                     )
                 ) {
@@ -641,7 +620,7 @@ class Diff
                     // Change second copy to insert.
                     $diffs[$insertPointer + 1][0] = self::INSERT;
                     // Throw away the previous equality (it needs to be reevaluated).
-                    if (count($equalities)) {
+                    if (!empty($equalities)) {
                         array_pop($equalities);
                     }
                     $lastequality = null;
@@ -651,11 +630,11 @@ class Diff
                         $post_del = true;
                         $equalities = array();
                     } else {
-                        if (count($equalities)) {
+                        if (!empty($equalities)) {
                             // Throw away the previous equality.
                             array_pop($equalities);
                         }
-                        if (count($equalities)) {
+                        if (!empty($equalities)) {
                             $pointer = end($equalities);
                         } else {
                             $pointer = -1;
@@ -682,13 +661,12 @@ class Diff
      *
      * @return string HTML representation.
      */
-    public function prettyHtml()
-    {
+    public function prettyHtml() : string {
         $diffs = $this->getChanges();
 
         $html = '';
         foreach ($diffs as $change) {
-            $op = $change[0];
+            $op   = $change[0];
             $data = $change[1];
             $text = str_replace(array(
                 '&', '<', '>', "\n",
@@ -696,12 +674,12 @@ class Diff
                 '&amp;', '&lt;', '&gt;', '&para;<br>',
             ), $data);
 
-            if ($op == self::INSERT) {
-                $html .= '<ins style="background:#e6ffe6;">' . $text . '</ins>';
-            } elseif ($op == self::DELETE) {
-                $html .= '<del style="background:#ffe6e6;">' . $text . '</del>';
+            if ($op === self::INSERT) {
+                $html .= "<ins style=\"background:#e6ffe6;\">$text</ins>";
+            } elseif ($op === self::DELETE) {
+                $html .= "<del style=\"background:#ffe6e6;\">$text</del>";
             } else {
-                $html .= '<span>' . $text . '</span>';
+                $html .= "<span>$text</span>";
             }
         }
 
@@ -713,8 +691,7 @@ class Diff
      *
      * @return string Source text.
      */
-    public function text1()
-    {
+    public function text1() : string {
         $diffs = $this->getChanges();
 
         $text = '';
@@ -722,7 +699,7 @@ class Diff
             $op = $change[0];
             $data = $change[1];
 
-            if ($op != self::INSERT) {
+            if ($op !== self::INSERT) {
                 $text .= $data;
             }
         }
@@ -735,8 +712,7 @@ class Diff
      *
      * @return string Destination text.
      */
-    public function text2()
-    {
+    public function text2() : string {
         $diffs = $this->getChanges();
 
         $text = '';
@@ -744,7 +720,7 @@ class Diff
             $op = $change[0];
             $data = $change[1];
 
-            if ($op != self::DELETE) {
+            if ($op !== self::DELETE) {
                 $text .= $data;
             }
         }
@@ -760,7 +736,7 @@ class Diff
      *
      * @return string Delta text.
      */
-    public function toDelta() {
+    public function toDelta() : string {
         $diffs = $this->getChanges();
 
         $text = array();
@@ -768,9 +744,9 @@ class Diff
             $op = $change[0];
             $data = $change[1];
 
-            if ($op == self::INSERT) {
-                $text[] = '+'. Utils::escapeString($data);
-            } elseif ($op == self::DELETE) {
+            if ($op === self::INSERT) {
+                $text[] = '+' . Utils::escapeString($data);
+            } elseif ($op === self::DELETE) {
                 $text[] = '-' . mb_strlen($data);
             } else {
                 $text[] = '=' . mb_strlen($data);
@@ -790,14 +766,13 @@ class Diff
      * @throws \InvalidArgumentException If invalid input. TODO create exception class
      * @return $this.
      */
-    public function fromDelta($text1, $delta)
-    {
+    public function fromDelta(string $text1, string $delta) : Diff {
         $diffs = array();
         // Cursor in text1
         $pointer = 0;
         $tokens = explode("\t", $delta);
         foreach ($tokens as $token) {
-            if ($token == '') {
+            if ($token === '') {
                 // Blank tokens are ok (from a trailing \t).
                 continue;
             }
@@ -815,26 +790,27 @@ class Diff
                 case '-':
                 case '=':
                     if (!is_numeric($param)) {
-                        throw new \InvalidArgumentException('Invalid number in delta: ' . $param);
+                        throw new \InvalidArgumentException("Invalid number in delta: $param");
                     } elseif ($param < 0) {
-                        throw new \InvalidArgumentException('Negative number in delta: ' . $param);
+                        throw new \InvalidArgumentException("Negative number in delta: $param");
                     } else {
                         $n = (int) $param;
                     }
                     $text = mb_substr($text1, $pointer, $n);
                     $pointer += $n;
                     $diffs[] = array(
-                        $op == '=' ? self::EQUAL : self::DELETE,
+                        $op === '=' ? self::EQUAL : self::DELETE,
                         $text,
                     );
                     break;
                 default:
                     // Anything else is an error.
-                    throw new \InvalidArgumentException('Invalid diff operation in delta: ' . $op);
+                    throw new \InvalidArgumentException("Invalid diff operation in delta: $op");
             }
         }
-        if ($pointer != mb_strlen($text1)) {
-            throw new \InvalidArgumentException('Delta length (' . $pointer . ') does not equal source text length (' . mb_strlen($text1) . ').');
+        if ($pointer !== mb_strlen($text1)) {
+            $len = mb_strlen($text1);
+            throw new \InvalidArgumentException("Delta length ($pointer) does not equal source text length ($len).");
         }
         $this->setChanges($diffs);
 
@@ -849,8 +825,7 @@ class Diff
      *
      * @return int Location within text2.
      */
-    public function xIndex($loc)
-    {
+    public function xIndex(int $loc) : int {
         $diffs = $this->getChanges();
 
         $chars1 = 0;
@@ -863,11 +838,11 @@ class Diff
             $op = $change[0];
             $text = $change[1];
             // Equality or deletion.
-            if ($op != self::INSERT) {
+            if ($op !== self::INSERT) {
                 $chars1 += mb_strlen($text);
             }
             // Equality or insertion.
-            if ($op != self::DELETE) {
+            if ($op !== self::DELETE) {
                 $chars2 += mb_strlen($text);
             }
             // Overshot the location.
@@ -880,7 +855,7 @@ class Diff
         }
 
         // The location was deleted.
-        if (count($diffs) != $i && $diffs[$i][0] == self::DELETE) {
+        if (count($diffs) !== $i && $diffs[$i][0] === self::DELETE) {
             return $last_chars2;
         }
         return $loc + $last_chars2 - $last_chars1;
@@ -891,8 +866,7 @@ class Diff
      *
      * @return int Number of changes.
      */
-    public function levenshtein()
-    {
+    public function levenshtein() : int {
         $diffs = $this->getChanges();
 
         $levenshtein = 0;
@@ -935,17 +909,16 @@ class Diff
      * @param int    $deadline   Optional time when the diff should be complete by.  Used internally for recursive calls.
      *                           Users should set $this->timeout instead.
      *
-     * @throws \InvalidArgumentException If texts is null. TODO create exception class
+     * @throws \TypeError If texts is null.
      * @return self
      */
-    public function main($text1, $text2, $checklines = true, $deadline = null)
-    {
+    public function main(string $text1, string $text2, bool $checklines = true, ?float $deadline = null) : Diff {
         // Set a deadline by which time the diff must be complete.
         if (!isset($deadline)) {
             if ($this->getTimeout() <= 0) {
                 $deadline  = PHP_INT_MAX;
             } else {
-                $deadline = microtime(1) + $this->getTimeout();
+                $deadline = microtime(true) + $this->getTimeout();
             }
         }
 
@@ -954,8 +927,8 @@ class Diff
         }
 
         // Check for equality (speedup).
-        if ($text1 == $text2) {
-            if ($text1 != '') {
+        if ($text1 === $text2) {
+            if ($text1 !== '') {
                 $this->setChanges(array(
                     array(self::EQUAL, $text1),
                 ));
@@ -966,14 +939,14 @@ class Diff
 
         $prevInternalEncoding = mb_internal_encoding();
         $newInternalEncoding = 'UCS-2LE';
-        if ($prevInternalEncoding != $newInternalEncoding) {
-            mb_internal_encoding($newInternalEncoding);
+        if ($prevInternalEncoding !== $newInternalEncoding) {
+//            mb_internal_encoding($newInternalEncoding);
 
-            $errorReportingLevel = error_reporting();
-            error_reporting($errorReportingLevel & ~E_NOTICE);
+//            $errorReportingLevel = error_reporting();
+//            error_reporting($errorReportingLevel & ~E_NOTICE);
 
-            $text1Draft = iconv($prevInternalEncoding, $newInternalEncoding, $text1);
-            $text2Draft = iconv($prevInternalEncoding, $newInternalEncoding, $text2);
+            $text1Draft = $text1;//iconv($prevInternalEncoding, $newInternalEncoding, $text1);
+            $text2Draft = $text2;//iconv($prevInternalEncoding, $newInternalEncoding, $text2);
 
             if ($text1Draft === false || $text2Draft === false) {
                 $newInternalEncoding = 'UCS-4LE';
@@ -985,7 +958,7 @@ class Diff
             $text1 = $text1Draft;
             $text2 = $text2Draft;
 
-            error_reporting($errorReportingLevel);
+//            error_reporting($errorReportingLevel);
         }
 
         // Trim off common prefix (speedup).
@@ -1012,17 +985,17 @@ class Diff
         $diffs = $this->compute($text1, $text2, $checklines, $deadline);
 
         // Restore the prefix and suffix.
-        if ($commonPrefix != '') {
+        if ($commonPrefix !== '') {
             array_unshift($diffs, array(self::EQUAL, $commonPrefix));
         }
-        if ($commonSuffix != '') {
+        if ($commonSuffix !== '') {
             array_push($diffs, array(self::EQUAL, $commonSuffix));
         }
 
-        if ($newInternalEncoding != $prevInternalEncoding) {
+        if ($newInternalEncoding !== $prevInternalEncoding) {
             mb_internal_encoding($prevInternalEncoding);
             foreach ($diffs as &$change) {
-                $change[1] = iconv($newInternalEncoding, $prevInternalEncoding, $change[1]);
+                $change[1] = $change[1];//iconv($newInternalEncoding, $prevInternalEncoding, $change[1]);
             }
             unset($change);
         }
@@ -1047,8 +1020,7 @@ class Diff
      *
      * @return array Array of changes.
      */
-    protected function compute($text1, $text2, $checklines, $deadline)
-    {
+    protected function compute(string $text1, string $text2, bool $checklines, ?float $deadline) : array {
         if ($text1 == '') {
             // Just add some text (speedup).
             return array(
@@ -1136,12 +1108,11 @@ class Diff
      *
      * @param string $text1    Old string to be diffed.
      * @param string $text2    New string to be diffed.
-     * @param int    $deadline Time when the diff should be complete by.
+     * @param float  $deadline Time when the diff should be complete by.
      *
      * @return array Array of changes.
      */
-    protected function lineMode($text1, $text2, $deadline)
-    {
+    protected function lineMode(string $text1, string $text2, float $deadline) : array {
         // Scan the text on a line-by-line basis first.
         list($text1, $text2, $lineArray) = $this->getToolkit()->linesToChars($text1, $text2);
 
@@ -1207,12 +1178,11 @@ class Diff
      *
      * @param string $text1    Old string to be diffed.
      * @param string $text2    New string to be diffed.
-     * @param int    $deadline Time at which to bail if not yet complete.
+     * @param float  $deadline Time at which to bail if not yet complete.
      *
      * @return array Array of diff arrays.
      */
-    protected function bisect($text1, $text2, $deadline)
-    {
+    protected function bisect(string $text1, string $text2, float $deadline) : array {
         // Cache the text lengths to prevent multiple calls.
         $text1Length = mb_strlen($text1);
         $text2Length = mb_strlen($text2);
@@ -1225,7 +1195,7 @@ class Diff
         $delta = $text1Length - $text2Length;
 
         // If the total number of characters is odd, then the front path will collide with the reverse path.
-        $front = $delta % 2 != 0;
+        $front = $delta % 2 !== 0;
 
         // Offsets for start and end of k loop.
         // Prevents mapping of space beyond the grid.
@@ -1236,14 +1206,14 @@ class Diff
 
         for ($d = 0; $d < $maxD; $d++) {
             // Bail out if deadline is reached.
-            if (microtime(1) > $deadline) {
+            if (microtime(true) > $deadline) {
                 break;
             }
 
             // Walk the front path one step.
             for ($k1 = -$d + $k1Start; $k1 < $d + 1 - $k1End; $k1 += 2) {
                 $k1Offset = $vOffset + $k1;
-                if ($k1 == -$d || ($k1 != $d && $v1[$k1Offset - 1] < $v1[$k1Offset + 1])) {
+                if ($k1 == -$d || ($k1 !== $d && $v1[$k1Offset - 1] < $v1[$k1Offset + 1])) {
                     $x1 = $v1[$k1Offset + 1];
                 } else {
                     $x1 = $v1[$k1Offset - 1] + 1;
@@ -1262,7 +1232,7 @@ class Diff
                     $k1Start += 2;
                 } elseif ($front) {
                     $k2Offset = $vOffset + $delta - $k1;
-                    if ($k2Offset >= 0 && $k2Offset < $vLength && $v2[$k2Offset] != -1) {
+                    if ($k2Offset >= 0 && $k2Offset < $vLength && $v2[$k2Offset] !== -1) {
                         // Mirror x2 onto top-left coordinate system.
                         $x2 = $text1Length - $v2[$k2Offset];
                         if ($x1 >= $x2) {
@@ -1276,7 +1246,7 @@ class Diff
             // Walk the reverse path one step.
             for ($k2 = -$d + $k2Start; $k2 < $d + 1 - $k2End; $k2 += 2) {
                 $k2Offset = $vOffset + $k2;
-                if ($k2 == -$d || ($k2 != $d && $v2[$k2Offset - 1] < $v2[$k2Offset + 1])) {
+                if ($k2 === -$d || ($k2 !== $d && $v2[$k2Offset - 1] < $v2[$k2Offset + 1])) {
                     $x2 = $v2[$k2Offset + 1];
                 } else {
                     $x2 = $v2[$k2Offset - 1] + 1;
@@ -1295,7 +1265,7 @@ class Diff
                     $k2Start += 2;
                 } elseif (!$front) {
                     $k1Offset = $vOffset + $delta - $k2;
-                    if ($k1Offset >= 0 && $k1Offset < $vLength && $v1[$k1Offset] != -1) {
+                    if ($k1Offset >= 0 && $k1Offset < $vLength && $v1[$k1Offset] !== -1) {
                         $x1 = $v1[$k1Offset];
                         $y1 = $vOffset + $x1 - $k1Offset;
                         // Mirror x2 onto top-left coordinate system.
@@ -1311,8 +1281,8 @@ class Diff
         // Diff took too long and hit the deadline or
         // number of diffs equals number of characters, no commonality at all.
         return array(
-          array(self::DELETE, $text1),
-          array(self::INSERT, $text2),
+            array(self::DELETE, $text1),
+            array(self::INSERT, $text2),
         );
     }
 
@@ -1323,12 +1293,11 @@ class Diff
      * @param string $text2    New string to be diffed.
      * @param int    $x        Index of split point in text1.
      * @param int    $y        Index of split point in text2.
-     * @param int    $deadline Time at which to bail if not yet complete.
+     * @param float $deadline Time at which to bail if not yet complete.
      *
      * @return array Array of diff arrays.
      */
-    protected function bisectSplit($text1, $text2, $x, $y, $deadline)
-    {
+    protected function bisectSplit(string $text1, string $text2, int $x, int $y, float $deadline) : array {
         $text1A = mb_substr($text1, 0, $x);
         $text2A = mb_substr($text2, 0, $y);
         $text1B = mb_substr($text1, $x);

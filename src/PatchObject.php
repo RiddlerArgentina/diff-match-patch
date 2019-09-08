@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -28,8 +28,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class PatchObject
-{
+final class PatchObject {
     /**
      * @var array
      * TODO replace to diff object
@@ -59,24 +58,23 @@ class PatchObject
      *
      * @return string The GNU diff string.
      */
-    public function __toString()
-    {
-        if ($this->getLength1() == 0) {
+    public function __toString() : string {
+        if ($this->getLength1() === 0) {
             $coords1 = $this->getStart1() . ',0';
-        } elseif ($this->getLength1() == 1) {
+        } elseif ($this->getLength1() === 1) {
             $coords1 = $this->getStart1() + 1;
         } else {
             $coords1 = ($this->getStart1() + 1) . ',' . $this->getLength1();
         }
 
-        if ($this->getLength2() == 0) {
+        if ($this->getLength2() === 0) {
             $coords2 = $this->getStart2() . ',0';
-        } elseif ($this->getLength2() == 1) {
+        } elseif ($this->getLength2() === 1) {
             $coords2 = $this->getStart2() + 1;
         } else {
             $coords2 = ($this->getStart2() + 1) . ',' . $this->getLength2();
         }
-        $patchText = "@@ -" . $coords1 . " +" . $coords2 . " @@\n";
+        $patchText = "@@ -$coords1 +$coords2 @@\n";
 
         // Escape the body of the patch with %xx notation.
         foreach ($this->getChanges() as $change) {
@@ -103,64 +101,56 @@ class PatchObject
     /**
      * @return int
      */
-    public function getLength1()
-    {
+    public function getLength1() : int {
         return $this->length1;
     }
 
     /**
      * @param $length1
      */
-    public function setLength1($length1)
-    {
+    public function setLength1($length1) : void {
         $this->length1 = (int)$length1;
     }
 
     /**
      * @return int
      */
-    public function getStart1()
-    {
+    public function getStart1() : int {
         return $this->start1;
     }
 
     /**
      * @param $start1
      */
-    public function setStart1($start1)
-    {
+    public function setStart1($start1) {
         $this->start1 = (int)$start1;
     }
 
     /**
      * @return int
      */
-    public function getLength2()
-    {
+    public function getLength2() : int {
         return $this->length2;
     }
 
     /**
      * @param $length2
      */
-    public function setLength2($length2)
-    {
+    public function setLength2($length2) : void {
         $this->length2 = (int)$length2;
     }
 
     /**
      * @return int
      */
-    public function getStart2()
-    {
+    public function getStart2() : int {
         return $this->start2;
     }
 
     /**
      * @param $start2
      */
-    public function setStart2($start2)
-    {
+    public function setStart2($start2) {
         $this->start2 = (int)$start2;
     }
 
@@ -168,32 +158,28 @@ class PatchObject
     /**
      * @return array
      */
-    public function getChanges()
-    {
+    public function getChanges() : array {
         return $this->changes;
     }
 
     /**
      * @param $changes
      */
-    public function setChanges($changes)
-    {
+    public function setChanges(array $changes) : void {
         $this->changes = $changes;
     }
 
     /**
      * @param array $change
      */
-    public function appendChanges(array $change)
-    {
+    public function appendChanges(array $change) : void {
         $this->changes[] = $change;
     }
 
     /**
      * @param array $change
      */
-    public function prependChanges(array $change)
-    {
+    public function prependChanges(array $change) : void {
         array_unshift($this->changes, $change);
     }
 

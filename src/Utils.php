@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -21,16 +21,53 @@
 
 namespace DiffMatchPatch;
 
-
 /**
  * Common utilities.
  *
  * @package DiffMatchPatch
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class Utils
-{
+final class Utils {
 
+    const CHAR_MAP = array(
+        '%21' => '!',
+        '%2A' => '*',
+        '%27' => "'",
+        '%28' => '(',
+        '%29' => ')',
+        '%3B' => ';',
+        '%2F' => '/',
+        '%3F' => '?',
+        '%3A' => ':',
+        '%40' => '@',
+        '%26' => '&',
+        '%3D' => '=',
+        '%2B' => '+',
+        '%24' => '$',
+        '%2C' => ',',
+        '%23' => '#',
+        '%20' => ' '
+    );
+
+    const CHAR_MAP_REVERSE = array(
+        '%21' => '%2521',
+        '%2A' => '%252A',
+        '%27' => "%2527",
+        '%28' => '%2528',
+        '%29' => '%2529',
+        '%3B' => '%253B',
+        '%2F' => '%252F',
+        '%3F' => '%253F',
+        '%3A' => '%253A',
+        '%40' => '%2540',
+        '%26' => '%2526',
+        '%3D' => '%253D',
+        '%2B' => '%252B',
+        '%24' => '%2524',
+        '%2C' => '%252C',
+        '%23' => '%2523',
+        '%20' => '%2520'
+    );
 
     /**
      * Special string encoding function like urlencode(),
@@ -40,14 +77,9 @@ class Utils
      *
      * @return string Encoded string.
      */
-    public static function escapeString($string)
-    {
+    public static function escapeString(string $string) : string {
         $string = rawurlencode($string);
-        $string = strtr($string, array(
-            '%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')', '%3B' => ';', '%2F' => '/', '%3F' => '?',
-            '%3A' => ':', '%40' => '@', '%26' => '&', '%3D' => '=', '%2B' => '+', '%24' => '$', '%2C' => ',', '%23' => '#', '%20' => ' '
-        ));
-        return $string;
+        return strtr($string, self::CHAR_MAP);
     }
 
     /**
@@ -58,12 +90,8 @@ class Utils
      *
      * @return string Decoded string.
      */
-    public static function unescapeString($string)
-    {
-        $string = strtr($string, array(
-            '%21' => '%2521', '%2A' => '%252A', '%27' => "%2527", '%28' => '%2528', '%29' => '%2529', '%3B' => '%253B', '%2F' => '%252F', '%3F' => '%253F',
-            '%3A' => '%253A', '%40' => '%2540', '%26' => '%2526', '%3D' => '%253D', '%2B' => '%252B', '%24' => '%2524', '%2C' => '%252C', '%23' => '%2523', '%20' => '%2520'
-        ));
+    public static function unescapeString(string $string) : string {
+        $string = strtr($string, self::CHAR_MAP_REVERSE);
         $string = rawurldecode($string);
         return $string;
     }

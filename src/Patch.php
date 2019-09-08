@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -28,8 +28,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class Patch
-{
+final class Patch {
     /**
      * @var float When deleting a large block of text (over ~64 characters), how close do
      * the contents have to be to match the expected contents. (0.0 = perfection,
@@ -54,8 +53,7 @@ class Patch
      * @param Diff|null $diff
      * @param Match|null $match
      */
-    public function __construct(Diff $diff = null, Match $match = null)
-    {
+    public function __construct(Diff $diff = null, Match $match = null) {
         if (!isset($match)) {
             $match = new Match();
         }
@@ -70,52 +68,44 @@ class Patch
     /**
      * @return float
      */
-    public function getDeleteTreshold()
-    {
+    public function getDeleteTreshold() : float {
         return $this->deleteTreshold;
     }
 
     /**
      * @param float $deleteTreshold
      */
-    public function setDeleteTreshold($deleteTreshold)
-    {
+    public function setDeleteTreshold(float $deleteTreshold) : void {
         $this->deleteTreshold = $deleteTreshold;
     }
 
     /**
      * @return int
      */
-    public function getMargin()
-    {
+    public function getMargin() : int {
         return $this->margin;
     }
 
     /**
      * @param int $margin
      */
-    public function setMargin($margin)
-    {
+    public function setMargin(int $margin) : void {
         $this->margin = $margin;
     }
 
     /**
      * @return Match
      */
-    protected function getMatch()
-    {
+    protected function getMatch() : Match {
         return $this->match;
     }
 
     /**
      * @return Diff
      */
-    protected function getDiff()
-    {
+    protected function getDiff() : Diff {
         return $this->diff;
     }
-
-
 
     /**
      * Parse a textual representation of patches and return a list of patch objects.
@@ -126,17 +116,17 @@ class Patch
      * @throws \UnexpectedValueException If text has bad syntax.
      * @return PatchObject[] Array of PatchObjects.
      */
-    public function fromText($patchText){
+    public function fromText(string $patchText) : array {
         $patches = array();
         if (!$patchText) {
             return $patches;
         }
 
         $lines = explode("\n", $patchText);
-        while (count($lines)) {
+        while (!empty($lines)) {
             $line = $lines[0];
             if (!preg_match("/^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@$/", $line, $m)) {
-                throw new \InvalidArgumentException("Invalid patch string: " . $line);
+                throw new \InvalidArgumentException("Invalid patch string: $line");
             }
             $patch = new PatchObject();
             $patch->setStart1($m[1]);
@@ -162,7 +152,7 @@ class Patch
             $patches[] = $patch;
             array_shift($lines);
 
-            while (count($lines)) {
+            while (!empty($lines)) {
                 $line = $lines[0];
                 if ($line) {
                     $sign = mb_substr($line, 0, 1);
@@ -207,8 +197,7 @@ class Patch
      *
      * @return string Text representation of patches.
      */
-    public function toText($patches)
-    {
+    public function toText(array $patches) : string {
         $text = '';
         foreach ($patches as $patch) {
             $text .= (string)$patch;
@@ -223,8 +212,7 @@ class Patch
      * @param PatchObject $patch The patch to grow.
      * @param string      $text Source text.
      */
-    public function addContext(PatchObject $patch, $text)
-    {
+    public function addContext(PatchObject $patch, string $text) : void {
         if (!mb_strlen($text)) {
             return;
         }
@@ -236,7 +224,7 @@ class Patch
         $match = $this->getMatch();
         while (
             (!$pattern || mb_strpos($text, $pattern) !== mb_strrpos($text, $pattern)) &&
-            ($match->getMaxBits() == 0 || mb_strlen($pattern) < $match->getMaxBits() - 2 * $this->getMargin())
+            ($match->getMaxBits() === 0 || mb_strlen($pattern) < $match->getMaxBits() - 2 * $this->getMargin())
         ) {
             $padding += $this->getMargin();
             $pattern = mb_substr(
@@ -291,8 +279,7 @@ class Patch
      * @throws \InvalidArgumentException If unknown call format.
      * @return PatchObject[] Array of PatchObjects.
      */
-    public function make($a, $b = null, $c = null)
-    {
+    public function make($a, $b = null, ?array $c = null) : array {
         $diff = $this->getDiff();
         if (is_string($a) && is_string($b) && is_null($c)) {
             // Method 1: text1, text2
@@ -339,26 +326,26 @@ class Patch
             list($diffType, $diffText) = $diffs[$i];
             $diffTextLen = mb_strlen($diffText);
 
-            if (count($patch->getChanges()) == 0 && $diffType != Diff::EQUAL) {
+            if (empty($patch->getChanges()) && $diffType !== Diff::EQUAL) {
                 // A new patch starts here.
                 $patch->setStart1($charCount1);
                 $patch->setStart2($charCount2);
             }
-            if ($diffType == Diff::INSERT) {
+            if ($diffType === Diff::INSERT) {
                 // Insertion.
                 $patch->appendChanges($diffs[$i]);
                 $patch->setLength2($patch->getLength2() + $diffTextLen);
                 $postPatchText = mb_substr($postPatchText, 0, $charCount2) .
                     $diffText . mb_substr($postPatchText, $charCount2);
-            } elseif ($diffType == Diff::DELETE) {
+            } elseif ($diffType === Diff::DELETE) {
                 // Deletion.
                 $patch->appendChanges($diffs[$i]);
                 $patch->setLength1($patch->getLength1() + $diffTextLen);
                 $postPatchText = mb_substr($postPatchText, 0, $charCount2) .
                     mb_substr($postPatchText, $charCount2 + $diffTextLen);
             } elseif (
-                $diffType == Diff::EQUAL && $diffTextLen <= 2 * $this->getMargin() &&
-                count($patch->getChanges()) && $i + 1 != count($diffs)
+                $diffType === Diff::EQUAL && $diffTextLen <= 2 * $this->getMargin() &&
+                !empty($patch->getChanges()) && (($i + 1) !== count($diffs))
             ) {
                 // Small equality inside a patch.
                 $patch->appendChanges($diffs[$i]);
@@ -366,9 +353,9 @@ class Patch
                 $patch->setLength2($patch->getLength2() + $diffTextLen);
             }
 
-            if ($diffType == Diff::EQUAL && $diffTextLen >= 2 * $this->getMargin()) {
+            if ($diffType === Diff::EQUAL && $diffTextLen >= 2 * $this->getMargin()) {
                 // Time for a new patch.
-                if (count($patch->getChanges())) {
+                if (!empty($patch->getChanges())) {
                     $this->addContext($patch, $prePatchText);
                     $patches[] = $patch;
                     $patch = new PatchObject();
@@ -382,16 +369,16 @@ class Patch
             }
 
             // Update the current character count.
-            if ($diffType != Diff::INSERT) {
+            if ($diffType !== Diff::INSERT) {
                 $charCount1 += $diffTextLen;
             }
-            if ($diffType != Diff::DELETE) {
+            if ($diffType !== Diff::DELETE) {
                 $charCount2 += $diffTextLen;
             }
         }
 
         // Pick up the leftover patch if not empty.
-        if (count($patch->getChanges())) {
+        if (!empty($patch->getChanges())) {
             $this->addContext($patch, $prePatchText);
             $patches[] = $patch;
         }
@@ -407,10 +394,9 @@ class Patch
      *
      * @param PatchObject[] $patches Array of PatchObjects.
      */
-    public function splitMax(&$patches)
-    {
+    public function splitMax(array &$patches) : void {
         $patchSize = $this->getMatch()->getMaxBits();
-        if ($patchSize == 0) {
+        if ($patchSize === 0) {
             // TODO PHP has fixed size int, so this case isn't relevant.
             return;
         }
@@ -443,19 +429,19 @@ class Patch
                     $patch->appendChanges(array(Diff::EQUAL, $preContext));
                 }
 
-                while (count($bigPatchDiffs) && $patch->getLength1() < $patchSize - $this->getMargin()) {
+                while (!empty($bigPatchDiffs) && $patch->getLength1() < $patchSize - $this->getMargin()) {
                     list($diffType, $diffText) = $bigPatchDiffs[0];
                     $diffTextLen = mb_strlen($diffText);
 
-                    if ($diffType == Diff::INSERT) {
+                    if ($diffType === Diff::INSERT) {
                         // Insertions are harmless.
                         $patch->setLength2($patch->getLength2() + $diffTextLen);
                         $start2 += $diffTextLen;
                         $patch->appendChanges(array_shift($bigPatchDiffs));
                         $empty = false;
                     } elseif (
-                        $diffType == Diff::DELETE && ($patchDiffs = $patch->getChanges()) &&
-                        count($patchDiffs) == 1 && $patchDiffs[0][0] == Diff::EQUAL &&
+                        $diffType === Diff::DELETE && ($patchDiffs = $patch->getChanges()) &&
+                        count($patchDiffs) === 1 && $patchDiffs[0][0] === Diff::EQUAL &&
                         2 * $patchSize < $diffTextLen
                     ) {
                         // This is a large deletion.  Let it pass in one chunk.
@@ -471,14 +457,14 @@ class Patch
                         $patch->setLength1($patch->getLength1() + $diffTextLen);
                         $start1 += $diffTextLen;
 
-                        if ($diffType == Diff::EQUAL) {
+                        if ($diffType === Diff::EQUAL) {
                             $patch->setLength2($patch->getLength2() + $diffTextLen);
                             $start2 += $diffTextLen;
                         } else {
                             $empty = false;
                         }
 
-                        if ($diffText == $bigPatchDiffs[0][1]) {
+                        if ($diffText === $bigPatchDiffs[0][1]) {
                             array_shift($bigPatchDiffs);
                         } else {
                             $bigPatchDiffs[0][1] = mb_substr($bigPatchDiffs[0][1], $diffTextLen);
@@ -497,12 +483,12 @@ class Patch
                 $diff->setChanges($bigPatchDiffs);
                 $postContext = $diff->text1();
                 $postContext = mb_substr($postContext, 0, $this->getMargin());
-                if ($postContext != '') {
+                if (!empty($postContext)) {
                     $patch->setLength1($patch->getLength1() + mb_strlen($postContext));
                     $patch->setLength2($patch->getLength2() + mb_strlen($postContext));
                     if (
                         ($patchDiffs = $patch->getChanges()) && count($patchDiffs) &&
-                        $patchDiffs[count($patchDiffs) - 1][0] == Diff::EQUAL
+                        $patchDiffs[count($patchDiffs) - 1][0] === Diff::EQUAL
                     ) {
                         $patchDiffs[count($patchDiffs) - 1][1] .= $postContext;
                         $patch->setChanges($patchDiffs);
@@ -528,8 +514,7 @@ class Patch
      *
      * @return string The padding string added to each side.
      */
-    public function addPadding(&$patches)
-    {
+    public function addPadding(array &$patches) : string {
         $paddingLength = $this->getMargin();
         $nullPadding = '';
         for ($i = 1; $i <= $paddingLength; $i++) {
@@ -547,7 +532,7 @@ class Patch
         $patch = &$patches[0];
         $diffs = $patch->getChanges();
         $firstChange = &$diffs[0];
-        if (!$diffs || $firstChange[0] != Diff::EQUAL) {
+        if (!$diffs || $firstChange[0] !== Diff::EQUAL) {
             // Add nullPadding equality.
             array_unshift($diffs, array(Diff::EQUAL, $nullPadding));
             // Should be 0.
@@ -572,7 +557,7 @@ class Patch
         $patch = &$patches[count($patches) - 1];
         $diffs = $patch->getChanges();
         $lastChange = &$diffs[count($diffs) - 1];
-        if (!$diffs || $lastChange[0] != Diff::EQUAL) {
+        if (!$diffs || $lastChange[0] !== Diff::EQUAL) {
             // Add nullPadding equality.
             array_push($diffs, array(Diff::EQUAL, $nullPadding));
             $patch->setLength1($patch->getLength1() + $paddingLength);
@@ -599,8 +584,7 @@ class Patch
      *
      * @return array Two element Array, containing the new text and an array of boolean values.
      */
-    public function apply($patches, $text)
-    {
+    public function apply(array $patches, string $text) : array {
         if (empty($patches)) {
             return array($text, array());
         }
@@ -609,7 +593,7 @@ class Patch
         $patches = $this->deepCopy($patches);
 
         $nullPadding = $this->addPadding($patches);
-        $text = $nullPadding . $text . $nullPadding;
+        $text = "$nullPadding$text$nullPadding";
         $this->splitMax($patches);
 
         // Delta keeps track of the offset between the expected and actual location
@@ -655,12 +639,12 @@ class Patch
                 // Found a match.  :)
                 $results[] = true;
                 $delta = $startLoc - $expectedLoc;
-                if ($endLoc == -1) {
+                if ($endLoc === -1) {
                     $text2 = mb_substr($text, $startLoc, $text1Len);
                 } else {
                     $text2 = mb_substr($text, $startLoc, $endLoc + $maxBits - $startLoc);
                 }
-                if ($text1 == $text2) {
+                if ($text1 === $text2) {
                     // Perfect match, just shove the replacement text in.
                     $text = mb_substr($text, 0, $startLoc) . $diff->text2() .
                         mb_substr($text, $startLoc + $text1Len);
@@ -679,17 +663,17 @@ class Patch
                         $index1 = 0;
                         foreach ($patch->getChanges() as $change) {
                             list ($op, $data) = $change;
-                            if ($op != Diff::EQUAL) {
+                            if ($op !== Diff::EQUAL) {
                                 $index2 = $diff->xIndex($index1);
-                                if ($op == Diff::INSERT) {
+                                if ($op === Diff::INSERT) {
                                     $text = mb_substr($text, 0, $startLoc + $index2) . $data .
                                         mb_substr($text, $startLoc + $index2);
-                                } elseif ($op == Diff::DELETE) {
+                                } elseif ($op === Diff::DELETE) {
                                     $text = mb_substr($text, 0, $startLoc + $index2) .
                                         mb_substr($text, $startLoc + $diff->xIndex($index1 + mb_strlen($data)));
                                 }
                             }
-                            if ($op != Diff::DELETE) {
+                            if ($op !== Diff::DELETE) {
                                 $index1 += mb_strlen($data);
                             }
                         }
@@ -727,8 +711,7 @@ class Patch
      *
      * @return PatchObject[] Array of PatchObjects.
      */
-    protected  function deepCopy($patches)
-    {
+    protected function deepCopy(array $patches) : array {
         $patchesCopy = array();
         foreach ($patches as $patch) {
             $patchCopy = clone $patch;

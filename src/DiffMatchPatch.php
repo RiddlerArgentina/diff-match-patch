@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * DiffMatchPatch is a port of the google-diff-match-patch (http://code.google.com/p/google-diff-match-patch/)
- * lib to PHP.
+ * DiffMatchPatch is a port of the google-diff-match-patch
+ * (http://code.google.com/p/google-diff-match-patch/) lib to PHP.
  *
  * (c) 2006 Google Inc.
  * (c) 2013 Daniil Skrobov <yetanotherape@gmail.com>
@@ -46,8 +46,7 @@ namespace DiffMatchPatch;
  * @author Neil Fraser <fraser@google.com>
  * @author Daniil Skrobov <yetanotherape@gmail.com>
  */
-class DiffMatchPatch
-{
+final class DiffMatchPatch {
     /**
      * The data structure representing a diff is an array of arrays:
      * array(
@@ -82,8 +81,7 @@ class DiffMatchPatch
      * @throws \UnexpectedValueException If property unknown.
      * @return float
      */
-    public function __get($name)
-    {
+    public function __get(string $name) : float {
         switch ($name){
             case 'Diff_Timeout':
                 $result = $this->diff->getTimeout();
@@ -107,7 +105,7 @@ class DiffMatchPatch
                 $result = $this->patch->getMargin();
                 break;
             default:
-                throw new \UnexpectedValueException('Unknown property: ' . $name);
+                throw new \UnexpectedValueException("Unknown property: $name");
         }
 
         return $result;
@@ -120,10 +118,8 @@ class DiffMatchPatch
      * @param mixed  $value Property value.
      *
      * @throws \UnexpectedValueException If property unknown.
-     * @return float
      */
-    public function __set($name, $value)
-    {
+    public function __set(string $name, $value) : void {
         switch ($name){
             case 'Diff_Timeout':
                 $this->diff->setTimeout($value);
@@ -147,13 +143,12 @@ class DiffMatchPatch
                 $this->patch->setMargin($value);
                 break;
             default:
-                throw new \UnexpectedValueException('Unknown property: ' . $name);
+                throw new \UnexpectedValueException("Unknown property: $name");
         }
     }
 
-    public function __construct()
-    {
-        $this->diff = new Diff();
+    public function __construct() {
+        $this->diff  = new Diff();
         $this->match = new Match();
         $this->patch = new Patch($this->diff, $this->match);
     }
@@ -171,8 +166,7 @@ class DiffMatchPatch
      * @throws \InvalidArgumentException If texts is null.
      * @return array Array of changes.
      */
-    public function diff_main($text1, $text2, $checklines = true)
-    {
+    public function diff_main(string $text1, string $text2, bool $checklines = true) : array {
         return $this->diff->main($text1, $text2, $checklines)->getChanges();
     }
 
@@ -182,8 +176,7 @@ class DiffMatchPatch
      *
      * @param array $diffs Array of diff arrays.
      */
-    public function diff_cleanupSemantic(&$diffs)
-    {
+    public function diff_cleanupSemantic(array &$diffs) : void {
         $this->diff->setChanges($diffs);
         $this->diff->cleanupSemantic();
         $diffs = $this->diff->getChanges();
@@ -195,8 +188,7 @@ class DiffMatchPatch
      *
      * @param array $diffs Array of diff arrays.
      */
-    public function diff_cleanupEfficiency(&$diffs)
-    {
+    public function diff_cleanupEfficiency(array &$diffs) : void {
         $this->diff->setChanges($diffs);
         $this->diff->cleanupEfficiency();
         $diffs = $this->diff->getChanges();
@@ -209,8 +201,7 @@ class DiffMatchPatch
      *
      * @return int Number of changes.
      */
-    public function diff_levenshtein($diffs)
-    {
+    public function diff_levenshtein(array $diffs) : int {
         $this->diff->setChanges($diffs);
         return $this->diff->levenshtein();
     }
@@ -222,8 +213,7 @@ class DiffMatchPatch
      *
      * @return string HTML representation.
      */
-    public function diff_prettyHtml($diffs)
-    {
+    public function diff_prettyHtml(array $diffs) : string {
         $this->diff->setChanges($diffs);
         return $this->diff->prettyHtml();
     }
@@ -238,8 +228,7 @@ class DiffMatchPatch
      * @throws \InvalidArgumentException If null inout.
      * @return int Best match index or -1.
      */
-    public function match_main($text, $pattern, $loc = 0)
-    {
+    public function match_main(string $text, string $pattern, int $loc = 0) : int {
         return $this->match->main($text, $pattern, $loc);
     }
 
@@ -265,8 +254,7 @@ class DiffMatchPatch
      * @throws \InvalidArgumentException If unknown call format.
      * @return PatchObject[] Array of PatchObjects.
      */
-    public function patch_make($a, $b = null, $c = null)
-    {
+    public function patch_make(string $a, ?string $b = null, ?array $c = null) : array {
         return $this->patch->make($a, $b, $c);
     }
 
@@ -277,8 +265,7 @@ class DiffMatchPatch
      *
      * @return string Text representation of patches.
      */
-    public function patch_toText($patches)
-    {
+    public function patch_toText(array $patches) : string {
         return $this->patch->toText($patches);
     }
 
@@ -291,8 +278,7 @@ class DiffMatchPatch
      * @throws \UnexpectedValueException If text has bad syntax.
      * @return PatchObject[] Array of PatchObjects.
      */
-    public function patch_fromText($text)
-    {
+    public function patch_fromText(string $text) : array {
        return $this->patch->fromText($text);
     }
 
@@ -305,8 +291,7 @@ class DiffMatchPatch
      *
      * @return array Two element Array, containing the new text and an array of boolean values.
      */
-    public function patch_apply($patches, $text)
-    {
+    public function patch_apply(array $patches, string $text) : array {
         return $this->patch->apply($patches, $text);
     }
 }
