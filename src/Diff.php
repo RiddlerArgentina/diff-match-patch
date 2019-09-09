@@ -362,7 +362,8 @@ final class Diff {
     }
 
     /**
-     * Given two strings, compute a score representing whether the internal boundary falls on logical boundaries.
+     * Given two strings, compute a score representing whether the internal
+     * boundary falls on logical boundaries.
      * Scores range from 6 (best) to 0 (worst).
      *
      * @param string $one First string.
@@ -383,12 +384,12 @@ final class Diff {
         // rather than force total conformity.
         $char1 = mb_substr($one, -1, 1);
         $char2 = mb_substr($two, 0, 1);
-        $nonAlphaNumeric1 = preg_match('/[^[:alnum:]]/u', $char1);
-        $nonAlphaNumeric2 = preg_match('/[^[:alnum:]]/u', $char2);
-        $whitespace1 = $nonAlphaNumeric1 && preg_match('/\s/', $char1);
-        $whitespace2 = $nonAlphaNumeric2 && preg_match('/\s/', $char2);
-        $lineBreak1 = $whitespace1 && preg_match('/[\r\n]/', $char1);
-        $lineBreak2 = $whitespace2 && preg_match('/[\r\n]/', $char2);
+        $nonAlphaNumeric1 = !ctype_alnum($char1);
+        $nonAlphaNumeric2 = !ctype_alnum($char2);
+        $whitespace1 = $nonAlphaNumeric1 && ctype_space($char1);
+        $whitespace2 = $nonAlphaNumeric2 && ctype_space($char2);
+        $lineBreak1 = $whitespace1 && ctype_cntrl($char1);
+        $lineBreak2 = $whitespace2 && ctype_cntrl($char2);
         $blankLine1 = $lineBreak1 && preg_match('/\n\r?\n$/', $one);
         $blankLine2 = $lineBreak2 && preg_match('/^\r?\n\r?\n/', $two);
 
